@@ -65,7 +65,11 @@ class PipelineService:
 
             # 4. Moment Detection Engine (Gemini)
             self.video_repo.update_status(video_id, status="detecting moments", progress=55)
-            moments = self.moment_service.detect_moments(video_id, transcript, scenes, duration)
+            
+            from database.repositories.users_repository import UsersRepository
+            is_premium = UsersRepository().is_premium(email)
+            
+            moments = self.moment_service.detect_moments(video_id, transcript, scenes, duration, is_premium)
             self.video_repo.update_status(video_id, status="processing", progress=70)
             
             # Filter moments matching user selection filters if active
@@ -81,10 +85,8 @@ class PipelineService:
             if not filtered_moments:
                 filtered_moments = moments
                 
-            # Limit count to 5 for premium users, 3 for free users
-            from database.repositories.users_repository import UsersRepository
-            is_premium = UsersRepository().is_premium(email)
-            limit = 5 if is_premium else 3
+            # Limit count to 20 for premium users, 3 for free users
+            limit = 20 if is_premium else 3
             final_moments = filtered_moments[:limit]
 
             # 5. Clip Slicing & Copywriting

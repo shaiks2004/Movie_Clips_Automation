@@ -18,7 +18,7 @@ class MomentService:
         self.metadata_dir = os.path.join(self.base_dir, "metadata")
         os.makedirs(self.metadata_dir, exist_ok=True)
 
-    def detect_moments(self, video_id: str, transcript: dict, scenes: dict, total_duration: float) -> list:
+    def detect_moments(self, video_id: str, transcript: dict, scenes: dict, total_duration: float, is_premium: bool = False) -> list:
         """
         Queries Gemini to parse transcription text and scene changes,
         identifying the top viral/educational segments.
@@ -46,7 +46,7 @@ class MomentService:
             moments = self._fallback_to_sample_moments(video_id)
             if moments:
                 return moments
-            return self._generate_default_moments(video_id, total_duration)
+            return self._generate_default_moments(video_id, total_duration, is_premium)
 
         # Prepare a structural text context representing transcript segments and scene cuts
         segments_txt = ""
@@ -55,11 +55,12 @@ class MomentService:
             
         scenes_txt = ", ".join([str(sc["timestamp"]) for sc in scenes.get("scenes", [])])
 
+        clip_target = "top 10-20 most engaging, coherent, and stand-alone highlights" if is_premium else "top 3 most engaging, coherent, and stand-alone highlights"
+
         prompt = (
             "You are an expert AI social media video editor. "
-            "Your task is to analyze the following video transcript text and scene cuts, and extract "
-            "the top 3-5 most engaging, coherent, and stand-alone highlights (30-90 seconds long) "
-            "that would perform well on TikTok, Instagram Reels, and YouTube Shorts.\n\n"
+            f"Your task is to analyze the following video transcript text and scene cuts, and extract the {clip_target} "
+            "(30-90 seconds long) that would perform well on TikTok, Instagram Reels, and YouTube Shorts.\n\n"
             "For each moment, determine:\n"
             "- start_time: Float (in seconds)\n"
             "- end_time: Float (in seconds)\n"
@@ -116,27 +117,30 @@ class MomentService:
             moments = self._fallback_to_sample_moments(video_id)
             if moments:
                 return moments
-            return self._generate_default_moments(video_id, total_duration)
+            return self._generate_default_moments(video_id, total_duration, is_premium)
 
-    def _generate_default_moments(self, video_id: str, total_duration: float) -> list:
+    def _generate_default_moments(self, video_id: str, total_duration: float, is_premium: bool = False) -> list:
         """
-        Fallback generator that cuts the video into 3 standard segments.
+        Fallback generator that cuts the video into standard segments.
         """
         moments = []
-        # Check if duration is sufficient
         clip_len = 45.0
         if total_duration < clip_len:
             clip_len = total_duration * 0.8
             
-        categories = ["Educational", "Motivational", "Funny"]
+        count = 15 if is_premium else 3
+        
+        categories = ["Educational", "Motivational", "Funny", "Trending", "Suspense"]
         reasons = [
             "Introduces the main theme of the video with high hook potential.",
             "Explains the core message or lesson with high value retention.",
-            "Summarizes key takeaways with clear summary presentation."
+            "Summarizes key takeaways with clear summary presentation.",
+            "Captures a highly shareable, trending hook sequence.",
+            "Builds high tension or curiosity for viewer retention."
         ]
         
-        starts = [total_duration * 0.1, total_duration * 0.4, total_duration * 0.7]
-        for i in range(3):
+        starts = [total_duration * (0.05 + (i * 0.9 / count)) for i in range(count)]
+        for i in range(count):
             start = round(starts[i], 1)
             end = round(start + clip_len, 1)
             if end > total_duration:
@@ -144,9 +148,9 @@ class MomentService:
             moments.append({
                 "start_time": start,
                 "end_time": end,
-                "score": 0.8 - (i * 0.05),
-                "reason": reasons[i],
-                "category": categories[i]
+                "score": round(0.9 - (i * 0.4 / count), 2),
+                "reason": reasons[i % len(reasons)],
+                "category": categories[i % len(categories)]
             })
             
         # Save locally
