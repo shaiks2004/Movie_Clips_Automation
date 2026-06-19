@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>ClipMood — Turn One Video Into Endless Content</title>
+    <meta name="description" content="Upload a single video and let AI generate multiple social-media-ready clips automatically."/>
+    
+    <!-- Custom Web Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Link Global design styles -->
+    <link rel="stylesheet" href="/static/css/styles.css">
+    
+    <style>
+        /* Specific Styles for Landing Page */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            padding: 1.25rem 2rem;
+            background: rgba(11, 15, 25, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--rule);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.75rem;
+            color: var(--white);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .logo span {
+            color: var(--primary);
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .nav-link {
+            color: var(--cream-dim);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-link:hover {
+            color: var(--white);
+        }
+
+        .hero-section {
+            min-height: 95vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 8rem 1.5rem 4rem;
+            position: relative;
+        }
+
+        .hero-h1 {
+            font-size: clamp(2.5rem, 6.5vw, 4.8rem);
+            line-height: 1.05;
+            max-width: 900px;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(to right, #ffffff 40%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-sub {
+            font-size: clamp(1rem, 2vw, 1.25rem);
+            font-weight: 300;
+            color: var(--cream-dim);
+            max-width: 600px;
+            line-height: 1.6;
+            margin-bottom: 2.5rem;
+        }
+
+        .hero-ctas {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        /* Feature section */
+        .section-padding {
+            padding: 7rem 1.5rem;
+            max-width: 1100px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4.5rem;
+        }
+
+        .section-tag {
+            color: var(--primary);
+            font-size: 0.8rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            display: block;
+        }
+
+        .section-title {
+            font-size: clamp(1.8rem, 4vw, 2.8rem);
+            font-weight: 700;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .feature-card {
+            background: var(--panel-dark);
+            border: 1px solid var(--rule);
+            padding: 2.25rem 1.75rem;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .feature-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(124, 58, 237, 0.1);
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.15rem;
+            margin-bottom: 0.6rem;
+        }
+
+        .feature-card p {
+            color: var(--cream-dim);
+            font-size: 0.88rem;
+            line-height: 1.6;
+        }
+
+        /* Pipeline Demo section */
+        .pipeline-demo {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .pipeline-step {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            background: var(--panel-dark);
+            border: 1px solid var(--rule);
+            padding: 1.25rem 1.75rem;
+            border-radius: 6px;
+        }
+
+        .pipeline-num {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--primary-glow);
+            border: 1px solid var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Oswald', sans-serif;
+            color: var(--white);
+            font-weight: 700;
+        }
+
+        .pipeline-details h4 {
+            font-size: 0.95rem;
+            margin-bottom: 0.15rem;
+        }
+
+        .pipeline-details p {
+            font-size: 0.8rem;
+            color: var(--cream-dim);
+        }
+
+        /* Pricing Plan Cards */
+        .pricing-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        @media(max-width: 640px) {
+            .pricing-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .pricing-card {
+            background: var(--panel-dark);
+            border: 1px solid var(--rule);
+            padding: 3rem 2rem;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .pricing-card.premium {
+            border-color: var(--primary);
+            box-shadow: 0 0 30px var(--primary-glow);
+        }
+
+        .pricing-card.premium::after {
+            content: 'POPULAR';
+            position: absolute;
+            top: 20px;
+            right: -35px;
+            background: var(--primary);
+            color: var(--white);
+            font-size: 0.65rem;
+            font-family: 'Oswald', sans-serif;
+            padding: 0.25rem 2.5rem;
+            transform: rotate(45deg);
+        }
+
+        .plan-title {
+            font-size: 1.2rem;
+            color: var(--cream-dim);
+            margin-bottom: 1rem;
+        }
+
+        .plan-price {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            font-family: 'Oswald', sans-serif;
+        }
+
+        .plan-price span {
+            font-size: 0.9rem;
+            color: var(--cream-dim);
+            font-family: 'Inter', sans-serif;
+        }
+
+        .plan-features {
+            list-style: none;
+            margin-bottom: 2rem;
+            flex-grow: 1;
+        }
+
+        .plan-features li {
+            font-size: 0.88rem;
+            color: var(--cream-dim);
+            padding: 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .plan-features li::before {
+            content: '✦';
+            color: var(--primary);
+        }
+
+        /* Modals styles */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        .modal-box {
+            background: var(--panel-dark);
+            border: 1px solid var(--rule);
+            padding: 3rem 2.5rem;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 440px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+
+        .modal-box h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .modal-box p {
+            color: var(--cream-dim);
+            font-size: 0.88rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-error {
+            color: var(--red);
+            font-size: 0.8rem;
+            margin-bottom: 0.8rem;
+            display: none;
+        }
+
+        footer {
+            padding: 4rem 1.5rem;
+            border-top: 1px solid var(--rule);
+            text-align: center;
+            color: var(--cream-dim);
+            font-size: 0.85rem;
+            background: #080A10;
+        }
+
+        footer a {
+            color: var(--white);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        footer a:hover {
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="ambient-glow glow-top-right"></div>
+    <div class="ambient-glow glow-bottom-left"></div>
+
+    <header>
+        <a href="/" class="logo">CLIP<span>MOOD</span></a>
+        <nav class="nav-links">
+            <a href="#features" class="nav-link">Features</a>
+            <a href="#pipeline" class="nav-link">How it works</a>
+            <a href="#pricing" class="nav-link">Pricing</a>
+            <button class="btn btn-primary" onclick="openModal()">Start Creating</button>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Hero section -->
+        <section class="hero-section">
+            <h1 class="hero-h1">Turn One Video<br>Into Endless Content</h1>
+            <p class="hero-sub">Upload a single long-form video and let AI automatically scan, transcript, and generate multiple social-media-ready clips in minutes.</p>
+            <div class="hero-ctas">
+                <button class="btn btn-primary" onclick="openModal()">Start Creating</button>
+                <a href="#pipeline" class="btn btn-secondary">Learn More</a>
+            </div>
+        </section>
+
+        <div class="sprocket-divider">
+            <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+        </div>
+
+        <!-- Features section -->
+        <section id="features" class="section-padding">
+            <div class="section-header">
+                <span class="section-tag">Features</span>
+                <h2 class="section-title">Automate your content pipeline</h2>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🎙️</div>
+                    <h3>Whisper Transcription</h3>
+                    <p>Highly accurate speech-to-text generating precise word-by-word timestamp maps of dialogue.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎬</div>
+                    <h3>Scene Detection</h3>
+                    <p>Intelligent visual segmentation detecting camera changes and cutting clean boundaries.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🧠</div>
+                    <h3>Gemini Highlights</h3>
+                    <p>Uses advanced LLM semantic analysis to identify educational, funny, motivational, and trending hooks.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔤</div>
+                    <h3>Burn-in Subtitles</h3>
+                    <p>Generate highly engaging subtitle caption overlays burned directly into the output video files.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">✍️</div>
+                    <h3>AI Copywriting</h3>
+                    <p>Creates social media titles, hook descriptions, and hashtags tailored for TikTok, Reels, and Shorts.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📅</div>
+                    <h3>Publishing Queue</h3>
+                    <p>Draft schedules and content libraries, ready for instant exporting and publishing.</p>
+                </div>
+            </div>
+        </section>
+
+        <div class="sprocket-divider">
+            <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+        </div>
+
+        <!-- Pipeline/How it works section -->
+        <section id="pipeline" class="section-padding">
+            <div class="section-header">
+                <span class="section-tag">AI Pipeline Demo</span>
+                <h2 class="section-title">How the factory processes your video</h2>
+            </div>
+            <div class="pipeline-demo">
+                <div class="pipeline-step">
+                    <div class="pipeline-num">1</div>
+                    <div class="pipeline-details">
+                        <h4>Upload Video</h4>
+                        <p>Drop in files up to 500 MB (MP4, MKV, AVI, MOV, WEBM).</p>
+                    </div>
+                </div>
+                <div class="pipeline-step">
+                    <div class="pipeline-num">2</div>
+                    <div class="pipeline-details">
+                        <h4>Snooping Dialogue</h4>
+                        <p>Audio is extracted and Whisper creates timestamp mappings of speech.</p>
+                    </div>
+                </div>
+                <div class="pipeline-step">
+                    <div class="pipeline-num">3</div>
+                    <div class="pipeline-details">
+                        <h4>Hook Classification</h4>
+                        <p>Gemini cross-references scene cuts and dialogue to score and rank hooks.</p>
+                    </div>
+                </div>
+                <div class="pipeline-step">
+                    <div class="pipeline-num">4</div>
+                    <div class="pipeline-details">
+                        <h4>Slicing & Subtitling</h4>
+                        <p>FFmpeg extracts highlight clips and overlays styled subtitles.</p>
+                    </div>
+                </div>
+                <div class="pipeline-step">
+                    <div class="pipeline-num">5</div>
+                    <div class="pipeline-details">
+                        <h4>Content Library Export</h4>
+                        <p>Get ready-to-post short videos packaged with titles, descriptions, and hashtags.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="sprocket-divider">
+            <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+        </div>
+
+        <!-- Pricing section -->
+        <section id="pricing" class="section-padding">
+            <div class="section-header">
+                <span class="section-tag">Pricing</span>
+                <h2 class="section-title">SaaS pricing models</h2>
+            </div>
+            <div class="pricing-cards">
+                <div class="pricing-card">
+                    <div class="plan-title">Free Plan</div>
+                    <div class="plan-price">₹0 <span>/ forever</span></div>
+                    <ul class="plan-features">
+                        <li>3 highlight clips per upload</li>
+                        <li>Whisper Transcription</li>
+                        <li>Basic scene cuts</li>
+                        <li>Standard subtitle files</li>
+                    </ul>
+                    <button class="btn btn-secondary" onclick="openModal()">Start Free</button>
+                </div>
+                <div class="pricing-card premium">
+                    <div class="plan-title">Premium Factory</div>
+                    <div class="plan-price">₹299 <span>/ month</span></div>
+                    <ul class="plan-features">
+                        <li>Unlimited clips per upload</li>
+                        <li>All 6 mood categories</li>
+                        <li>Priority processing queue</li>
+                        <li>Burned-in styled subtitles</li>
+                        <li>AI Copywriter captions</li>
+                    </ul>
+                    <a href="mailto:{{ your_email }}?subject=ClipMood%20Premium%20Upgrade" class="btn btn-primary">Upgrade Now</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>ClipMood AI Content Factory &copy; 2026 · Support: <a href="mailto:{{ your_email }}">{{ your_email }}</a></p>
+    </footer>
+
+    <!-- Email modal overlay -->
+    <div class="modal-overlay" id="emailModal">
+        <div class="modal-box">
+            <h3>Start Creating Content</h3>
+            <p>Enter your email to enter the Upload Studio. Free tiers get 3 clips per upload.</p>
+            <input type="email" id="emailInput" class="form-input" placeholder="you@email.com" autocomplete="email"/>
+            <div class="modal-error" id="modalError">Please enter a valid email address.</div>
+            <div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1rem;">
+                <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="submitEmail()">Enter Dashboard</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Film Grain JS Script -->
+    <script src="/static/js/film-grain.js"></script>
+    
+    <script>
+        const modal = document.getElementById("emailModal");
+        const emailInput = document.getElementById("emailInput");
+        const modalError = document.getElementById("modalError");
+
+        function openModal() {
+            modal.classList.add("open");
+            setTimeout(() => emailInput.focus(), 100);
+        }
+
+        function closeModal() {
+            modal.classList.remove("open");
+            modalError.style.display = "none";
+        }
+
+        function submitEmail() {
+            const email = emailInput.value.trim();
+            if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                modalError.style.display = "block";
+                return;
+            }
+            window.location.href = "/tool?email=" + encodeURIComponent(email);
+        }
+
+        emailInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") submitEmail();
+        });
+
+        modal.addEventListener("click", (e) => {
+            if (e.target === modal) closeModal();
+        });
+    </script>
+</body>
+</html>

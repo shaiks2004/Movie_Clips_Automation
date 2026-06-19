@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>ClipMood — Studio Dashboard</title>
+    
+    <!-- Custom Web Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Global Style Sheet -->
+    <link rel="stylesheet" href="/static/css/styles.css">
+    
+    <style>
+        /* Specific Styles for SaaS Dashboard Layout */
+        .dashboard-layout {
+            display: flex;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Sidebar styling */
+        .sidebar {
+            width: 250px;
+            background: #080A10;
+            border-right: 1px solid var(--rule);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 50;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--rule);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .sidebar-nav {
+            padding: 1.5rem 1rem;
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            flex-grow: 1;
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem 1.25rem;
+            border-radius: 4px;
+            color: var(--cream-dim);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .sidebar-link:hover, .sidebar-link.active {
+            color: var(--white);
+            background: rgba(124, 58, 237, 0.1);
+            border-left: 3px solid var(--primary);
+        }
+
+        .sidebar-footer {
+            padding: 1.5rem;
+            border-top: 1px solid var(--rule);
+        }
+
+        /* Content Panel container */
+        .content-container {
+            flex-grow: 1;
+            margin-left: 250px;
+            padding: 2.5rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        @media(max-width: 768px) {
+            .sidebar {
+                width: 70px;
+            }
+            .sidebar-link span:not(.icon) {
+                display: none;
+            }
+            .content-container {
+                margin-left: 70px;
+            }
+            .logo span:not(.logo-primary) {
+                display: none;
+            }
+        }
+
+        /* Dashboard sections */
+        .dashboard-section {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Drop Zone */
+        .upload-card {
+            border: 2px dashed var(--rule);
+            background: var(--panel-dark);
+            border-radius: 8px;
+            padding: 4rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            position: relative;
+            transition: border-color 0.2s, background-color 0.2s;
+        }
+
+        .upload-card:hover, .upload-card.over {
+            border-color: var(--primary);
+            background: rgba(124, 58, 237, 0.05);
+        }
+
+        .upload-card input[type=file] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .file-selected-text {
+            color: var(--highlight);
+            margin-top: 1rem;
+            font-weight: 500;
+        }
+
+        /* Visual Processing Pipeline steps */
+        .pipeline-track-wrapper {
+            margin-top: 2rem;
+            background: var(--panel-dark);
+            border: 1px solid var(--rule);
+            padding: 2rem;
+            border-radius: 8px;
+        }
+
+        .pipeline-title {
+            font-family: 'Oswald', sans-serif;
+            text-transform: uppercase;
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .pipeline-steps-flow {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .flow-step {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            opacity: 0.3;
+            transition: opacity 0.3s;
+        }
+
+        .flow-step.active {
+            opacity: 1;
+        }
+
+        .flow-step.complete {
+            opacity: 0.7;
+        }
+
+        .flow-circle {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid var(--rule);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .flow-step.active .flow-circle {
+            border-color: var(--primary);
+            background: var(--primary-glow);
+            box-shadow: 0 0 10px var(--primary-glow);
+        }
+
+        .flow-step.complete .flow-circle {
+            border-color: var(--green);
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--green);
+        }
+
+        .flow-label {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        /* Library filters & Grid */
+        .library-filters {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .filter-select {
+            background: var(--panel-dark);
+            border: 1px solid var(--rule);
+            color: var(--white);
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            outline: none;
+        }
+
+        .clips-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .library-card {
+            background: var(--panel-dark);
+            border: 1px solid var(--rule);
+            border-radius: 6px;
+            overflow: hidden;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .library-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--primary);
+        }
+
+        .library-preview {
+            aspect-ratio: 16/9;
+            background: #000;
+            position: relative;
+        }
+
+        .library-preview video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .library-body {
+            padding: 1.25rem;
+        }
+
+        .library-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .library-meta {
+            font-size: 0.78rem;
+            color: var(--cream-dim);
+            margin-bottom: 0.75rem;
+        }
+
+        .library-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        /* Analytics Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: var(--panel-dark);
+            border: 1px solid var(--rule);
+            padding: 2rem 1.5rem;
+            border-radius: 6px;
+        }
+
+        .stat-val {
+            font-size: 2.2rem;
+            font-family: 'Oswald', sans-serif;
+            color: var(--accent);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--cream-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="dashboard-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="/" class="logo">CLIP<span>MOOD</span></a>
+                <div class="pulse-icon"></div>
+            </div>
+            
+            <ul class="sidebar-nav">
+                <li class="sidebar-link active" id="nav-upload" onclick="switchSection('upload')">
+                    <span class="icon">📤</span><span>Upload Studio</span>
+                </li>
+                <li class="sidebar-link" id="nav-clips" onclick="switchSection('clips')">
+                    <span class="icon">🎬</span><span>Generated Clips</span>
+                </li>
+                <li class="sidebar-link" id="nav-library" onclick="switchSection('library')">
+                    <span class="icon">📂</span><span>Content Library</span>
+                </li>
+                <li class="sidebar-link" id="nav-queue" onclick="switchSection('queue')">
+                    <span class="icon">📅</span><span>Publishing Queue</span>
+                </li>
+                <li class="sidebar-link" id="nav-analytics" onclick="switchSection('analytics')">
+                    <span class="icon">📊</span><span>Analytics</span>
+                </li>
+                <li class="sidebar-link" id="nav-billing" onclick="switchSection('billing')">
+                    <span class="icon">💳</span><span>Billing</span>
+                </li>
+                <li class="sidebar-link" id="nav-settings" onclick="switchSection('settings')">
+                    <span class="icon">⚙️</span><span>Settings</span>
+                </li>
+            </ul>
+            
+            <div class="sidebar-footer">
+                <span class="badge {% if is_premium %}badge-premium{% else %}badge-free{% endif %}" style="width: 100%; text-align: center;">
+                    {% if is_premium %}Premium Factory{% else %}Free Tier{% endif %}
+                </span>
+            </div>
+        </aside>
+
+        <!-- Main Workspace container -->
+        <main class="content-container">
+            
+            <!-- SECTION 1: UPLOAD STUDIO -->
+            <section id="upload" class="dashboard-section" style="display: block;">
+                <h2 style="margin-bottom: 0.5rem;">Upload Studio</h2>
+                <p class="subtitle" style="color: var(--cream-dim); font-size: 0.9rem; margin-bottom: 2rem;">Drop in long-form videos to feed the AI pipeline.</p>
+                
+                <div class="upload-card" id="dropZone">
+                    <input type="file" id="fileInput" accept=".mp4,.mkv,.avi,.mov,.webm"/>
+                    <div class="upload-icon">🎞️</div>
+                    <h3>Drag & Drop Video Reel here, or click to browse</h3>
+                    <p style="color: var(--cream-dim); font-size: 0.8rem; margin-top: 0.5rem;">Supports MP4, MKV, AVI, MOV, WEBM (Max 500 MB)</p>
+                    <div class="file-selected-text" id="fileName"></div>
+                </div>
+
+                <!-- Pipeline Configurations -->
+                <div class="settings" style="margin-top: 2rem;">
+                    <div class="field" style="margin-bottom: 1.5rem;">
+                        <label style="display: block; font-family: 'Oswald', sans-serif; font-size: 0.8rem; color: var(--cream-dim); text-transform: uppercase; margin-bottom: 0.5rem;">Select highlight focus categories</label>
+                        <div class="moods" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            <input type="checkbox" class="mood-cb" id="cb-educational" value="educational" checked style="display:none;"><label class="mood-lbl" for="cb-educational">Educational</label>
+                            <input type="checkbox" class="mood-cb" id="cb-motivational" value="motivational" checked style="display:none;"><label class="mood-lbl" for="cb-motivational">Motivational</label>
+                            <input type="checkbox" class="mood-cb" id="cb-funny" value="funny" checked style="display:none;"><label class="mood-lbl" for="cb-funny">Funny</label>
+                            <input type="checkbox" class="mood-cb" id="cb-emotional" value="emotional" checked style="display:none;"><label class="mood-lbl" for="cb-emotional">Emotional</label>
+                            <input type="checkbox" class="mood-cb" id="cb-suspense" value="suspense" checked style="display:none;"><label class="mood-lbl" for="cb-suspense">Suspense</label>
+                            <input type="checkbox" class="mood-cb" id="cb-trending" value="trending" checked style="display:none;"><label class="mood-lbl" for="cb-trending">Trending</label>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" id="submitBtn" onclick="startJob()" style="width: 100%; margin-top: 1rem;">Process Reels</button>
+
+                <!-- Processing visual flow tracker -->
+                <div class="pipeline-track-wrapper" id="pipelineBox" style="display: none;">
+                    <div class="pipeline-title">
+                        <span class="pulse-icon"></span>
+                        <span>AI Processing Factory Pipeline: <span id="pipelineProgressText">0%</span></span>
+                    </div>
+                    
+                    <div class="pipeline-steps-flow">
+                        <div class="flow-step" id="step-upload">
+                            <div class="flow-circle">1</div><div class="flow-label">Uploading File</div>
+                        </div>
+                        <div class="flow-step" id="step-transcription">
+                            <div class="flow-circle">2</div><div class="flow-label">Whisper Speech-to-Text Transcription</div>
+                        </div>
+                        <div class="flow-step" id="step-scenes">
+                            <div class="flow-circle">3</div><div class="flow-label">Ffprobe Scene Cut Boundaries Extraction</div>
+                        </div>
+                        <div class="flow-step" id="step-moments">
+                            <div class="flow-circle">4</div><div class="flow-label">Gemini Multimodal Highlight Moment Extraction</div>
+                        </div>
+                        <div class="flow-step" id="step-rendering">
+                            <div class="flow-circle">5</div><div class="flow-label">FFmpeg Slicing & Caption Overlay Render</div>
+                        </div>
+                        <div class="flow-step" id="step-packaging">
+                            <div class="flow-circle">6</div><div class="flow-label">AI Post Copywriting (Titles, Captions, Tags)</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 2: GENERATED CLIPS (Theater Preview) -->
+            <section id="clips" class="dashboard-section">
+                <h2>Generated Clips</h2>
+                <p class="subtitle" style="color: var(--cream-dim); font-size: 0.9rem; margin-bottom: 2rem;">Preview and export rendered highlights from the active session.</p>
+                <div class="results-wrap" id="resultsWrap">
+                    <div style="text-align: center; padding: 4rem 2rem; color: var(--cream-dim);">
+                        <span style="font-size: 3rem;">🎞️</span>
+                        <p style="margin-top: 1rem;">No processed reels loaded. Go to the Upload Studio and upload a video first.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 3: CONTENT LIBRARY -->
+            <section id="library" class="dashboard-section">
+                <h2>Content Library</h2>
+                <p class="subtitle" style="color: var(--cream-dim); font-size: 0.9rem; margin-bottom: 2rem;">Searchable database archive of all clips generated for your account.</p>
+                
+                <div class="library-filters">
+                    <input type="text" id="libSearch" class="form-input" placeholder="Search keywords..." style="max-width: 250px;" oninput="loadLibrary()"/>
+                    <select id="libMood" class="filter-select" onchange="loadLibrary()">
+                        <option value="">All Moods</option>
+                        <option value="Educational">Educational</option>
+                        <option value="Motivational">Motivational</option>
+                        <option value="Funny">Funny</option>
+                        <option value="Emotional">Emotional</option>
+                        <option value="Suspense">Suspense</option>
+                        <option value="Trending">Trending</option>
+                    </select>
+                </div>
+
+                <div class="clips-grid" id="libraryGrid">
+                    <!-- Loaded dynamically via fetch -->
+                </div>
+            </section>
+
+            <!-- SECTION 4: PUBLISHING QUEUE -->
+            <section id="queue" class="dashboard-section">
+                <h2>Publishing Queue</h2>
+                <p class="subtitle" style="color: var(--cream-dim); font-size: 0.9rem; margin-bottom: 2rem;">Draft schedules and monitor upcoming post distribution states.</p>
+                
+                <div class="glass-panel" style="margin-bottom: 2rem;">
+                    <h3>Add Clip to Queue</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1.5rem;">
+                        <div class="field">
+                            <label style="font-size: 0.8rem; color: var(--cream-dim);">Platform Destination</label>
+                            <select id="qPlatform" class="form-input" style="margin-top: 0.3rem;">
+                                <option value="tiktok">TikTok</option>
+                                <option value="instagram">Instagram Reels</option>
+                                <option value="youtube">YouTube Shorts</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label style="font-size: 0.8rem; color: var(--cream-dim);">Schedule Date & Time</label>
+                            <input type="datetime-local" id="qTime" class="form-input" style="margin-top: 0.3rem;"/>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="submitToQueue()" style="margin-top: 1.5rem; width: 100%;">Save Schedule Draft</button>
+                </div>
+
+                <div class="glass-panel">
+                    <h3>Draft Queue List</h3>
+                    <div id="queueList" style="margin-top: 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
+                        <!-- Loaded dynamically -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 5: ANALYTICS -->
+            <section id="analytics" class="dashboard-section">
+                <h2>Performance Analytics</h2>
+                <p class="subtitle" style="color: var(--cream-dim); font-size: 0.9rem; margin-bottom: 2rem;">Processing metrics, storage volumes, and engine performance logs.</p>
+                
+                <div class="stats-grid">
+                    <div class="stat-card"><div class="stat-val" id="statVideos">0</div><div class="stat-label">Total Uploaded Videos</div></div>
+                    <div class="stat-card"><div class="stat-val" id="statClips">0</div><div class="stat-label">Total Rendered Clips</div></div>
+                    <div class="stat-card"><div class="stat-val" id="statTime">0s</div><div class="stat-label">Avg Processing Time</div></div>
+                    <div class="stat-card"><div class="stat-val" id="statMood">N/A</div><div class="stat-label">Top Clip Category</div></div>
+                </div>
+            </section>
+
+            <!-- SECTION 6: BILLING -->
+            <section id="billing" class="dashboard-section">
+                <h2>Billing & Accounts</h2>
+                <p class="subtitle" style="color: var(--cream-dim); font-size: 0.9rem; margin-bottom: 2rem;">Manage payment status and upgrade usage limitations.</p>
+                
+                <div class="glass-panel" style="max-width: 500px;">
+                    <h3 style="color: var(--accent);">Upgrade to Premium</h3>
+                    <p style="color: var(--cream-dim); font-size: 0.9rem; margin-top: 0.5rem; line-height: 1.6;">
+                        Unlock unlimited clips per video, high priority pipeline queues, and automatic subtitle hard-coding.
+                    </p>
+                    <div style="font-size: 1.5rem; font-weight: bold; margin-top: 1.5rem;">₹299 <span style="font-size: 0.9rem; font-weight: normal; color: var(--cream-dim);">/ month</span></div>
+                    <a href="mailto:{{ your_email }}?subject=Upgrade%20to%20Premium" class="btn btn-primary" style="margin-top: 1.5rem; width: 100%;">Email for UPI Activation</a>
+                </div>
+            </section>
+
+            <!-- SECTION 7: SETTINGS -->
+            <section id="settings" class="dashboard-section">
+                <h2>Settings</h2>
+                <p class="subtitle" style="color: var(--cream-dim); font-size: 0.9rem; margin-bottom: 2rem;">Configure credentials, developer keys, and storage parameters.</p>
+                
+                <div class="glass-panel" style="max-width: 550px;">
+                    <h3>API Access Configuration</h3>
+                    <div class="field" style="margin-top: 1.25rem;">
+                        <label style="font-size: 0.8rem; color: var(--cream-dim);">User Email Account</label>
+                        <input type="text" id="setEmail" class="form-input" readonly value="{{ email }}" style="margin-top: 0.3rem; opacity: 0.6;"/>
+                    </div>
+                    <div class="field" style="margin-top: 1.25rem;">
+                        <label style="font-size: 0.8rem; color: var(--cream-dim);">Gemini API Key</label>
+                        <input type="password" class="form-input" value="••••••••••••••••" readonly style="margin-top: 0.3rem; opacity: 0.6;"/>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Toast elements -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Film Grain JS Script -->
+    <script src="/static/js/film-grain.js"></script>
+
+    <script>
+        const EMAIL = {{ email | tojson }};
+        let activeJobId = null;
+
+        function switchSection(sectionId) {
+            document.querySelectorAll('.dashboard-section').forEach(sec => sec.style.display = 'none');
+            document.querySelectorAll('.sidebar-link').forEach(link => link.classList.remove('active'));
+            
+            document.getElementById(sectionId).style.display = 'block';
+            document.getElementById('nav-' + sectionId).classList.add('active');
+
+            if (sectionId === 'library') loadLibrary();
+            if (sectionId === 'queue') loadQueue();
+            if (sectionId === 'analytics') loadAnalytics();
+        }
+
+        // Drag & Drop bindings
+        const dropZone=document.getElementById('dropZone'),fileInput=document.getElementById('fileInput'),fileName=document.getElementById('fileName');
+        let selectedFile=null;
+        fileInput.addEventListener('change',()=>pickFile(fileInput.files[0]));
+        dropZone.addEventListener('dragover',e=>{e.preventDefault();dropZone.classList.add('over');});
+        dropZone.addEventListener('dragleave',()=>dropZone.classList.remove('over'));
+        dropZone.addEventListener('drop',e=>{e.preventDefault();dropZone.classList.remove('over');pickFile(e.dataTransfer.files[0]);});
+
+        function pickFile(f){
+            if(!f)return;
+            const ext=f.name.split('.').pop().toLowerCase();
+            if(!['mp4','mkv','avi','mov','webm'].includes(ext)){showToast('Unsupported format.');return;}
+            selectedFile=f;
+            fileName.textContent='✓ '+f.name+' ('+(f.size/(1024*1024)).toFixed(1)+' MB)';
+        }
+
+        async function startJob() {
+            if(!selectedFile){showToast('Please select a video file.');return;}
+            const moods=[...document.querySelectorAll('.mood-cb:checked')].map(c=>c.value);
+            if(!moods.length){showToast('Select at least one category.');return;}
+
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.textContent = 'Processing...';
+            
+            // Show pipeline tracker and reset step layouts
+            document.getElementById('pipelineBox').style.display = 'block';
+            resetPipelineSteps();
+            updatePipelineStep('upload', 'active');
+
+            const fd = new FormData();
+            fd.append('video', selectedFile);
+            fd.append('email', EMAIL);
+            moods.forEach(m => fd.append('moods', m));
+
+            try {
+                const res = await fetch('/upload', {method: 'POST', body: fd});
+                const data = await res.json();
+                if(!res.ok || data.error) throw new Error(data.error || 'Upload failed.');
+                activeJobId = data.job_id;
+                
+                updatePipelineStep('upload', 'complete');
+                pollStatus(activeJobId, btn);
+            } catch(err) {
+                showToast(err.message);
+                btn.disabled = false;
+                btn.textContent = 'Process Reels';
+                document.getElementById('pipelineBox').style.display = 'none';
+            }
+        }
+
+        function resetPipelineSteps() {
+            const steps = ['upload','transcription','scenes','moments','rendering','packaging'];
+            steps.forEach(s => {
+                const el = document.getElementById('step-' + s);
+                el.className = 'flow-step';
+            });
+            document.getElementById('pipelineProgressText').textContent = '0%';
+        }
+
+        function updatePipelineStep(stepId, state) {
+            const el = document.getElementById('step-' + stepId);
+            if (el) {
+                el.className = 'flow-step ' + state;
+            }
+        }
+
+        function pollStatus(jobId, btn) {
+            const iv = setInterval(async () => {
+                try {
+                    const res = await fetch('/status/' + jobId);
+                    const data = await res.json();
+                    
+                    const progress = data.progress || 0;
+                    document.getElementById('pipelineProgressText').textContent = progress + '%';
+
+                    // Update visual flow step indicators based on progress ranges
+                    if (progress >= 15 && progress < 35) {
+                        updatePipelineStep('transcription', 'active');
+                    } else if (progress >= 35 && progress < 55) {
+                        updatePipelineStep('transcription', 'complete');
+                        updatePipelineStep('scenes', 'active');
+                    } else if (progress >= 55 && progress < 75) {
+                        updatePipelineStep('scenes', 'complete');
+                        updatePipelineStep('moments', 'active');
+                    } else if (progress >= 75 && progress < 95) {
+                        updatePipelineStep('moments', 'complete');
+                        updatePipelineStep('rendering', 'active');
+                    } else if (progress >= 95) {
+                        updatePipelineStep('rendering', 'complete');
+                        updatePipelineStep('packaging', 'active');
+                    }
+
+                    if (data.status === 'done') {
+                        clearInterval(iv);
+                        updatePipelineStep('packaging', 'complete');
+                        btn.disabled = false;
+                        btn.textContent = 'Process Reels';
+                        showToast('Video processing complete!');
+                        
+                        // Switch to clips preview section
+                        switchSection('clips');
+                        renderClips(data.clips, data.total_duration);
+                    } else if (data.status === 'error') {
+                        clearInterval(iv);
+                        btn.disabled = false;
+                        btn.textContent = 'Process Reels';
+                        showToast(data.error || 'Pipeline crashed.');
+                    }
+                } catch(_) {}
+            }, 1500);
+        }
+
+        function renderClips(clips, totalDuration) {
+            const wrap = document.getElementById('resultsWrap');
+            if(!totalDuration) totalDuration = 120;
+
+            wrap.innerHTML = `
+                <div class="cinema-suite">
+                    <div class="cinema-left">
+                        <div class="timeline-container">
+                            <div class="timeline-header">
+                                <span class="timeline-title">Reel Highlights Timeline</span>
+                                <span class="range-val" style="font-size: 0.8rem;">Length: ${Math.round(totalDuration)}s</span>
+                            </div>
+                            <div class="timeline-track" id="timelineTrack"></div>
+                        </div>
+                        <div class="results-title" style="font-family: 'Oswald', sans-serif; font-size: 1.15rem; margin-bottom: 1rem;">Rendered Clips (${clips.length})</div>
+                        <div id="clipsList" style="display: flex; flex-direction: column; gap: 0.75rem;"></div>
+                    </div>
+                    <div class="cinema-right">
+                        <div class="player-container" id="playerContainer">
+                            <div class="player-frame">
+                                <div class="player-fallback" id="playerFallback">
+                                    <span class="player-fallback-icon">🎬</span>
+                                    <p>Select a clip highlight card to run the screening player</p>
+                                </div>
+                                <video id="cinemaVideo" controls style="display: none; width: 100%; height: 100%;"></video>
+                            </div>
+                            <div class="player-info" id="playerInfo" style="display: none;">
+                                <div class="player-title" id="playerTitle">Clip Title</div>
+                                <div class="player-meta" id="playerMeta">Starts at 0s &middot; 30s long</div>
+                                
+                                <div class="glass-panel" style="margin-top: 1rem; padding: 1rem; border-color: rgba(255,255,255,0.02);">
+                                    <div style="font-size: 0.82rem; font-weight: bold; color: var(--accent); margin-bottom: 0.25rem;">AI Description Hook:</div>
+                                    <p id="playerDesc" style="font-size: 0.8rem; color: var(--cream-dim); line-height: 1.5;"></p>
+                                    <div id="playerTags" style="display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.5rem;"></div>
+                                </div>
+                                
+                                <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                                    <button class="btn btn-secondary" id="btnCopyCaption" style="flex: 1; padding: 0.5rem 1rem; font-size: 0.8rem;">Copy Caption</button>
+                                    <button class="btn btn-primary" id="btnAddToQueue" style="flex: 1; padding: 0.5rem 1rem; font-size: 0.8rem;">Schedule draft</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const track = document.getElementById('timelineTrack');
+            const list = document.getElementById('clipsList');
+
+            clips.forEach((clip, idx) => {
+                const leftPct = (clip.start / totalDuration) * 100;
+                const widthPct = (clip.duration / totalDuration) * 100;
+                const moodClass = 'mood-' + clip.mood.toLowerCase();
+
+                const segment = document.createElement('div');
+                segment.className = `timeline-segment ${moodClass}`;
+                segment.style.left = `${leftPct}%`;
+                segment.style.width = `${widthPct}%`;
+                segment.title = `Clip ${clip.index}: ${clip.mood}`;
+                track.appendChild(segment);
+
+                const card = document.createElement('div');
+                card.className = 'clip-card';
+                card.style.animationDelay = (idx * 0.05) + 's';
+                card.innerHTML = `
+                    <div class="clip-left" style="cursor: pointer; flex-grow: 1;">
+                        <span class="clip-idx">${clip.index}</span>
+                        <div>
+                            <div class="clip-h4" style="font-size: 0.9rem; font-weight: 600;">${clip.title || 'Clip ' + clip.index}</div>
+                            <div class="clip-meta" style="font-size: 0.76rem; color: var(--cream-dim);">Starts at ${clip.start}s &middot; ${clip.duration}s long</div>
+                        </div>
+                        <span class="mood-badge ${moodClass}">${clip.mood}</span>
+                    </div>
+                    <a class="btn-dl" href="/download/${encodeURIComponent(clip.filename)}" download>Download</a>
+                `;
+
+                const loadClipAction = () => {
+                    document.querySelectorAll('.clip-card').forEach(c => c.classList.remove('active'));
+                    card.classList.add('active');
+                    
+                    document.getElementById('playerFallback').style.display = 'none';
+                    const video = document.getElementById('cinemaVideo');
+                    video.style.display = 'block';
+                    video.src = `/download/${encodeURIComponent(clip.filename)}`;
+                    video.play().catch(()=>{});
+
+                    document.getElementById('playerInfo').style.display = 'block';
+                    document.getElementById('playerTitle').textContent = clip.title || `Clip ${clip.index}`;
+                    document.getElementById('playerMeta').textContent = `Starts at ${clip.start}s &middot; ${clip.duration}s long`;
+                    document.getElementById('playerDesc').textContent = clip.description || 'No description available.';
+                    
+                    const tagsBox = document.getElementById('playerTags');
+                    tagsBox.innerHTML = '';
+                    if(clip.hashtags) {
+                        clip.hashtags.forEach(tag => {
+                            const badge = document.createElement('span');
+                            badge.className = 'mood-badge';
+                            badge.style.background = 'rgba(255,255,255,0.05)';
+                            badge.style.color = 'var(--white)';
+                            badge.textContent = tag;
+                            tagsBox.appendChild(badge);
+                        });
+                    }
+
+                    // Setup buttons actions
+                    document.getElementById('btnCopyCaption').onclick = () => {
+                        const txt = `${clip.title}\n\n${clip.description}\n\n${(clip.hashtags || []).join(' ')}`;
+                        navigator.clipboard.writeText(txt);
+                        showToast('Caption copied!');
+                    };
+                    
+                    document.getElementById('btnAddToQueue').onclick = () => {
+                        // Store clip ID in modal context and switch to schedule tab
+                        document.getElementById('nav-queue').setAttribute('data-target-clip', clip.clip_id);
+                        document.getElementById('nav-queue').setAttribute('data-target-title', clip.title || '');
+                        document.getElementById('nav-queue').setAttribute('data-target-desc', clip.description || '');
+                        document.getElementById('nav-queue').setAttribute('data-target-tags', JSON.stringify(clip.hashtags || []));
+                        switchSection('queue');
+                    };
+                    
+                    const container = document.getElementById('playerContainer');
+                    container.className = 'player-container glow-' + clip.mood.toLowerCase();
+                };
+
+                segment.addEventListener('click', loadClipAction);
+                card.querySelector('.clip-left').addEventListener('click', loadClipAction);
+
+                list.appendChild(card);
+            });
+        }
+
+        async function loadLibrary() {
+            const grid = document.getElementById('libraryGrid');
+            grid.innerHTML = '<div style="color:var(--cream-dim);">Loading library...</div>';
+            
+            const search = document.getElementById('libSearch').value.trim();
+            const mood = document.getElementById('libMood').value;
+            
+            try {
+                const res = await fetch(`/api/library?email=${encodeURIComponent(EMAIL)}&search=${encodeURIComponent(search)}&mood=${encodeURIComponent(mood)}`);
+                const data = await res.json();
+                
+                grid.innerHTML = '';
+                if(!data.clips || !data.clips.length) {
+                    grid.innerHTML = '<div style="color:var(--cream-dim); grid-column: 1/-1;">No clips matching filter criteria.</div>';
+                    return;
+                }
+                
+                data.clips.forEach(clip => {
+                    const card = document.createElement('div');
+                    card.className = 'library-card';
+                    card.innerHTML = `
+                        <div class="library-preview">
+                            <video src="/download/${encodeURIComponent(clip.filename)}" preload="metadata" muted controls></video>
+                        </div>
+                        <div class="library-body">
+                            <div class="library-title">${clip.ai_content?.title || 'Clip highlight'}</div>
+                            <div class="library-meta">Duration: ${clip.duration}s &middot; Mood: ${clip.mood}</div>
+                            <div style="font-size: 0.8rem; color: var(--cream-dim); line-height: 1.5; height: 3em; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
+                                ${clip.ai_content?.description || 'No description hook.'}
+                            </div>
+                            <div class="library-actions">
+                                <a class="btn btn-secondary" style="flex:1; padding: 0.4rem; font-size: 0.75rem;" href="/download/${encodeURIComponent(clip.filename)}" download>Download</a>
+                                <button class="btn btn-primary" style="flex:1; padding: 0.4rem; font-size: 0.75rem;" onclick="deleteClip('${clip.clip_id}')">Delete</button>
+                            </div>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+            } catch(e) {
+                grid.innerHTML = '<div style="color:var(--red);">Error loading library.</div>';
+            }
+        }
+
+        async function deleteClip(clipId) {
+            if(!confirm('Are you sure you want to delete this clip?')) return;
+            try {
+                const res = await fetch(`/api/clip/${clipId}`, {method: 'DELETE'});
+                if(res.ok) {
+                    showToast('Clip deleted.');
+                    loadLibrary();
+                }
+            } catch(_) {}
+        }
+
+        async function loadQueue() {
+            const list = document.getElementById('queueList');
+            list.innerHTML = '<div style="color:var(--cream-dim);">Loading publishing queue...</div>';
+            
+            // Check if we came from generated clips to prefill form inputs
+            const navQueue = document.getElementById('nav-queue');
+            const pendingClipId = navQueue.getAttribute('data-target-clip');
+            if (pendingClipId) {
+                // Keep the target attributes saved, but we can set form states if desired
+                showToast('Draft clip loaded. Pick schedule time and platform above.');
+            }
+
+            try {
+                const res = await fetch(`/api/queue?email=${encodeURIComponent(EMAIL)}`);
+                const data = await res.json();
+                
+                list.innerHTML = '';
+                if(!data.queue || !data.queue.length) {
+                    list.innerHTML = '<div style="color:var(--cream-dim);">Publishing queue is empty.</div>';
+                    return;
+                }
+                
+                data.queue.forEach(item => {
+                    const row = document.createElement('div');
+                    row.className = 'flow-step active';
+                    row.style.background = 'rgba(255,255,255,0.02)';
+                    row.style.padding = '1rem';
+                    row.style.borderRadius = '4px';
+                    row.style.justifyContent = 'space-between';
+                    
+                    const date = new Date(item.schedule_time).toLocaleString();
+                    row.innerHTML = `
+                        <div style="display:flex; align-items:center; gap: 1rem; flex-grow:1;">
+                            <span style="font-size: 1.5rem;">📅</span>
+                            <div>
+                                <h4 style="font-size: 0.9rem;">${item.title} (${item.platform.toUpperCase()})</h4>
+                                <p style="font-size: 0.78rem; color: var(--cream-dim);">Scheduled for: ${date} &middot; Status: <span style="color: var(--yellow);">${item.status}</span></p>
+                            </div>
+                        </div>
+                        <button class="btn btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.75rem;" onclick="deleteQueueItem('${item.queue_id}')">Cancel</button>
+                    `;
+                    list.appendChild(row);
+                });
+            } catch(e) {
+                list.innerHTML = '<div style="color:var(--red);">Error loading queue list.</div>';
+            }
+        }
+
+        async function submitToQueue() {
+            const navQueue = document.getElementById('nav-queue');
+            const clipId = navQueue.getAttribute('data-target-clip');
+            if(!clipId) {
+                showToast('Select a clip from "Generated Clips" or "Content Library" to queue first.');
+                return;
+            }
+
+            const platform = document.getElementById('qPlatform').value;
+            const time = document.getElementById('qTime').value;
+            if(!time) {
+                showToast('Please select a schedule date & time.');
+                return;
+            }
+
+            const title = navQueue.getAttribute('data-target-title');
+            const desc = navQueue.getAttribute('data-target-desc');
+            const tags = JSON.parse(navQueue.getAttribute('data-target-tags') || '[]');
+
+            try {
+                const res = await fetch('/api/queue', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        clip_id: clipId,
+                        title: title,
+                        description: desc,
+                        hashtags: tags,
+                        platform: platform,
+                        schedule_time: time
+                    })
+                });
+                
+                if(res.ok) {
+                    showToast('Draft clip scheduled successfully!');
+                    // Clear tracking target attributes
+                    navQueue.removeAttribute('data-target-clip');
+                    navQueue.removeAttribute('data-target-title');
+                    navQueue.removeAttribute('data-target-desc');
+                    navQueue.removeAttribute('data-target-tags');
+                    loadQueue();
+                } else {
+                    const data = await res.json();
+                    showToast(data.error || 'Failed to add to queue.');
+                }
+            } catch(_) {
+                showToast('Failed to queue clip.');
+            }
+        }
+
+        async function deleteQueueItem(queueId) {
+            try {
+                const res = await fetch(`/api/queue/${queueId}`, {method: 'DELETE'});
+                if(res.ok) {
+                    showToast('Schedule draft canceled.');
+                    loadQueue();
+                }
+            } catch(_) {}
+        }
+
+        async function loadAnalytics() {
+            try {
+                const res = await fetch(`/api/analytics?email=${encodeURIComponent(EMAIL)}`);
+                const data = await res.json();
+                
+                document.getElementById('statVideos').textContent = data.videos_count || 0;
+                document.getElementById('statClips').textContent = data.clips_count || 0;
+                document.getElementById('statTime').textContent = (data.avg_processing_time || 0) + 's';
+                document.getElementById('statMood').textContent = data.top_mood || 'N/A';
+            } catch(_) {}
+        }
+
+        let toastTimer;
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => t.classList.remove('show'), 4000);
+        }
+    </script>
+</body>
+</html>

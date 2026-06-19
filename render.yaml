@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: clipmood
+    env: python
+    buildCommand: apt-get install -y ffmpeg && pip install -r requirements.txt
+    startCommand: python app.py
+    envVars:
+      - key: FLASK_ENV
+        value: production
+    disk:
+      name: clipmood-data
+      mountPath: /opt/render/project/src/outputs
+      sizeGB: 1

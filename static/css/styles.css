@@ -1,0 +1,226 @@
+/* ==========================================================================
+   ClipMood AI Content Factory — Core SaaS Stylesheet
+   Design Inspiration: Linear, Runway, Framer, ElevenLabs
+   ========================================================================== */
+
+:root {
+    --bg-dark: #0B0F19;
+    --panel-dark: #111827;
+    --panel-dark-hover: #1F2937;
+    --primary: #7C3AED;
+    --primary-glow: rgba(124, 58, 237, 0.15);
+    --accent: #A855F7;
+    --highlight: #F59E0B;
+    --rule: #374151;
+    
+    --cream: #F3EAD9;
+    --cream-dim: #9CA3AF;
+    --white: #FFFFFF;
+    
+    --red: #EF4444;
+    --green: #10B981;
+    --blue: #3B82F6;
+    --pink: #EC4899;
+    --yellow: #F59E0B;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: var(--bg-dark);
+    color: var(--white);
+    overflow-x: hidden;
+    min-height: 100vh;
+}
+
+h1, h2, h3, h4, .display-font {
+    font-family: 'Oswald', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    font-weight: 700;
+}
+
+.bebas-font {
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 0.05em;
+}
+
+/* --- Visual Effects: Film Grain & Ambient Glow --- */
+.grain-canvas {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    pointer-events: none;
+    opacity: 0.07;
+}
+
+.ambient-glow {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(124,58,237,0.12) 0%, rgba(11,15,25,0) 70%);
+    pointer-events: none;
+    border-radius: 50%;
+    filter: blur(80px);
+}
+
+.glow-top-right {
+    top: -200px;
+    right: -100px;
+}
+
+.glow-bottom-left {
+    bottom: -200px;
+    left: -100px;
+}
+
+/* Glassmorphism Panel styles */
+.glass-panel {
+    background: rgba(17, 24, 39, 0.7);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* Custom Sprocket Film Dividers */
+.sprocket-divider {
+    height: 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 0 16px;
+    background: #080A10;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    overflow: hidden;
+}
+
+.sprocket-divider span {
+    width: 8px;
+    height: 8px;
+    border-radius: 1px;
+    background: #000;
+    flex-shrink: 0;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Button UI Components */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    font-family: 'Oswald', sans-serif;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    border: none;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: var(--white);
+    box-shadow: 0 0 20px var(--primary-glow);
+}
+
+.btn-primary:hover {
+    background: var(--accent);
+    transform: translateY(-1px);
+    box-shadow: 0 0 30px rgba(168, 85, 247, 0.3);
+}
+
+.btn-secondary {
+    background: transparent;
+    border: 1px solid var(--rule);
+    color: var(--white);
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--white);
+}
+
+.btn-accent {
+    background: var(--highlight);
+    color: #111827;
+}
+
+.btn-accent:hover {
+    background: #FBBF24;
+    transform: translateY(-1px);
+}
+
+.btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* Form Controls */
+.form-input {
+    width: 100%;
+    background: rgba(17, 24, 39, 0.8);
+    border: 1px solid var(--rule);
+    color: var(--white);
+    padding: 0.75rem 1rem;
+    border-radius: 4px;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.form-input:focus {
+    border-color: var(--primary);
+}
+
+/* Badge Mood Tags */
+.mood-badge {
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    padding: 0.25rem 0.6rem;
+    border-radius: 3px;
+    letter-spacing: 0.02em;
+    display: inline-block;
+}
+
+.mood-educational { background: rgba(59, 130, 246, 0.15); color: var(--blue); }
+.mood-motivational { background: rgba(239, 68, 68, 0.15); color: var(--red); }
+.mood-funny { background: rgba(245, 158, 11, 0.15); color: var(--yellow); }
+.mood-emotional { background: rgba(236, 72, 153, 0.15); color: var(--pink); }
+.mood-suspense { background: rgba(16, 185, 129, 0.15); color: var(--green); }
+.mood-trending { background: rgba(168, 85, 247, 0.15); color: var(--accent); }
+
+/* --- Micro-interactions & animations --- */
+@keyframes pulseGlow {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.8; }
+}
+
+.pulse-icon {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--red);
+    box-shadow: 0 0 10px var(--red);
+    animation: pulseGlow 2s infinite;
+}

@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: clipmood_web
+    restart: always
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    volumes:
+      # Persistent volumes to preserve media directories and database logs
+      - clipmood_uploads:/app/uploads
+      - clipmood_outputs:/app/outputs
+      - clipmood_clips:/app/clips
+      - clipmood_transcripts:/app/transcripts
+      - clipmood_scenes:/app/scenes
+      - clipmood_subtitles:/app/subtitles
+      - clipmood_metadata:/app/metadata
+
+volumes:
+  clipmood_uploads:
+  clipmood_outputs:
+  clipmood_clips:
+  clipmood_transcripts:
+  clipmood_scenes:
+  clipmood_subtitles:
+  clipmood_metadata:
