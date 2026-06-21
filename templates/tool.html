@@ -469,6 +469,7 @@
                         <div class="field">
                             <label style="font-size: 0.8rem; color: var(--cream-dim);">Platform Destination</label>
                             <select id="qPlatform" class="form-input" style="margin-top: 0.3rem;">
+                                <option value="facebook">Facebook Video</option>
                                 <option value="tiktok">TikTok</option>
                                 <option value="instagram">Instagram Reels</option>
                                 <option value="youtube">YouTube Shorts</option>
@@ -890,12 +891,18 @@
                     row.style.justifyContent = 'space-between';
                     
                     const date = new Date(item.schedule_time).toLocaleString();
+                    let statusColor = 'var(--yellow)';
+                    if (item.status === 'published') statusColor = '#10b981';
+                    else if (item.status === 'error') statusColor = '#ef4444';
+                    else if (item.status === 'publishing') statusColor = '#3b82f6';
+                    else if (item.status === 'queued') statusColor = '#94a3b8';
+
                     row.innerHTML = `
                         <div style="display:flex; align-items:center; gap: 1rem; flex-grow:1;">
                             <span style="font-size: 1.5rem;">📅</span>
                             <div>
                                 <h4 style="font-size: 0.9rem;">${item.title} (${item.platform.toUpperCase()})</h4>
-                                <p style="font-size: 0.78rem; color: var(--cream-dim);">Scheduled for: ${date} &middot; Status: <span style="color: var(--yellow);">${item.status}</span></p>
+                                <p style="font-size: 0.78rem; color: var(--cream-dim);">Scheduled for: ${date} &middot; Status: <span style="color: ${statusColor}; font-weight: 500;">${item.status.toUpperCase()}</span></p>
                             </div>
                         </div>
                         <button class="btn btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.75rem;" onclick="deleteQueueItem('${item.queue_id}')">Cancel</button>

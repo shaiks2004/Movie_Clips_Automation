@@ -379,5 +379,12 @@ except Exception as e:
     print(f"Error configuring indexes: {e}")
 
 if __name__ == "__main__":
+    # Start background scheduler queue publisher
+    try:
+        from database.services.publisher_worker import start_publisher_worker
+        start_publisher_worker()
+    except Exception as worker_err:
+        print(f"Error starting publisher worker: {worker_err}")
+
     print("\n[OK] ClipMood AI Content Factory running at http://localhost:5000\n")
     app.run(debug=False, host="0.0.0.0", port=5000)
