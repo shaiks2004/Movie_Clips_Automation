@@ -39,6 +39,12 @@ def setup_indexes():
     publish_queue.create_index([("status", ASCENDING)])
     print("[OK] Created indexes on collection 'publish_queue'")
     
+    # 5. clip_performance collection indexes
+    clip_performance = db["clip_performance"]
+    clip_performance.create_index([("clip_id", ASCENDING)])
+    clip_performance.create_index([("platform", ASCENDING)])
+    print("[OK] Created indexes on collection 'clip_performance'")
+    
     print("MongoDB indexes configuration complete.")
 
 if __name__ == "__main__":

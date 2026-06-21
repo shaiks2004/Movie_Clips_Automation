@@ -17,7 +17,8 @@ class SceneService:
         """
         # 1. Fallback check: Search for pre-computed local files in reference directories
         local_ref_dir = r"c:\Projects\Movie_Clips\Scenes"
-        if os.path.exists(local_ref_dir):
+        disable_fallbacks = os.getenv("DISABLE_FALLBACKS", "false").lower() == "true"
+        if not disable_fallbacks and os.path.exists(local_ref_dir):
             # Try exact match first
             for file in os.listdir(local_ref_dir):
                 if video_id in file and file.endswith(".json"):

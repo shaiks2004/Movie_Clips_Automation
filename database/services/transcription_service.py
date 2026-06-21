@@ -21,9 +21,10 @@ class TranscriptionService:
         
         # Local binaries
         self.ffmpeg_bin = "ffmpeg"
-        local_ffmpeg = os.path.join(self.base_dir, "ffmpeg.exe")
-        if os.path.exists(local_ffmpeg):
-            self.ffmpeg_bin = local_ffmpeg
+        if os.name == "nt":
+            local_ffmpeg = os.path.join(self.base_dir, "ffmpeg.exe")
+            if os.path.exists(local_ffmpeg):
+                self.ffmpeg_bin = local_ffmpeg
 
     def transcribe(self, video_id: str, video_path: str) -> dict:
         """
@@ -31,19 +32,21 @@ class TranscriptionService:
         Attempts to load a pre-computed local transcript first, falling back to Whisper API.
         """
         # 1. Fallback check: Search for pre-computed local files in reference directories
-        local_ref_dir = r"c:\Projects\Movie_Clips\Transcript"
-        if os.path.exists(local_ref_dir):
-            for file in os.listdir(local_ref_dir):
-                if video_id in file and file.endswith(".json"):
-                    ref_path = os.path.join(local_ref_dir, file)
-                    target_path = os.path.join(self.transcripts_dir, f"{video_id}_transcript.json")
-                    try:
-                        shutil.copy2(ref_path, target_path)
-                        print(f"[OK] Found local pre-computed transcript: {file}. Copied successfully.")
-                        with open(target_path, "r", encoding="utf-8") as f:
-                            return json.load(f)
-                    except Exception as e:
-                        print(f"Error copying local transcript: {e}")
+        disable_fallbacks = os.getenv("DISABLE_FALLBACKS", "false").lower() == "true"
+        if not disable_fallbacks:
+            local_ref_dir = r"c:\Projects\Movie_Clips\Transcript"
+            if os.path.exists(local_ref_dir):
+                for file in os.listdir(local_ref_dir):
+                    if video_id in file and file.endswith(".json"):
+                        ref_path = os.path.join(local_ref_dir, file)
+                        target_path = os.path.join(self.transcripts_dir, f"{video_id}_transcript.json")
+                        try:
+                            shutil.copy2(ref_path, target_path)
+                            print(f"[OK] Found local pre-computed transcript: {file}. Copied successfully.")
+                            with open(target_path, "r", encoding="utf-8") as f:
+                                return json.load(f)
+                        except Exception as e:
+                            print(f"Error copying local transcript: {e}")
 
         # 2. Whisper API Transcription
         if not self.client:
@@ -99,7 +102,84 @@ class TranscriptionService:
                 return transcript_data
 
             except Exception as api_err:
-                print(f"OpenAI Whisper API failed: {api_err}. Trying pre-computed sample transcript fallback...")
+                print(f"OpenAI Whisper API failed: {api_err}. Attempting live Gemini transcription fallback...")
+                gemini_key = os.getenv("GEMINI_API_KEY")
+                if gemini_key and "YOUR_GEMINI" not in gemini_key:
+                    try:
+                        from google import genai
+                        gemini_client = genai.Client(api_key=gemini_key)
+                        print("Uploading video file to Gemini API...")
+                        uploaded_file = gemini_client.files.upload(file=video_path)
+                        
+                        import time
+                        for _ in range(30):
+                            if uploaded_file.state.name != "PROCESSING":
+                                break
+                            time.sleep(2)
+                            uploaded_file = gemini_client.files.get(name=uploaded_file.name)
+                            
+                        if uploaded_file.state.name == "FAILED":
+                            raise Exception("Gemini video file processing failed.")
+                            
+                        print("Requesting transcription from gemini-2.5-flash...")
+                        prompt = (
+                            "Analyze the uploaded video/audio file and transcribe all spoken words. "
+                            "Format the output strictly as a JSON object with: "
+                            "- language: string (e.g. 'en') "
+                            "- full_text: string (concatenated text) "
+                            "- segments: an array of objects containing 'id' (int), 'start_time' (float in seconds), 'end_time' (float in seconds), and 'text' (string). "
+                            "Ensure every segment is 2-5 seconds long. "
+                            "Format the output strictly as a JSON object inside markdown backticks:\n"
+                            "```json\n"
+                            "{\n"
+                            "  \"language\": \"en\",\n"
+                            "  \"full_text\": \"...\",\n"
+                            "  \"segments\": [\n"
+                            "    {\n"
+                            "      \"id\": 0,\n"
+                            "      \"start_time\": 0.0,\n"
+                            "      \"end_time\": 3.5,\n"
+                            "      \"text\": \"Hello world\"\n"
+                            "    }\n"
+                            "  ]\n"
+                            "}\n"
+                            "```"
+                        )
+                        
+                        gemini_response = gemini_client.models.generate_content(
+                            model="gemini-2.5-flash",
+                            contents=[uploaded_file, prompt]
+                        )
+                        
+                        raw_text = gemini_response.text.strip()
+                        if "```json" in raw_text:
+                            json_content = raw_text.split("```json")[1].split("```")[0].strip()
+                        elif "```" in raw_text:
+                            json_content = raw_text.split("```")[1].split("```")[0].strip()
+                        else:
+                            json_content = raw_text
+                            
+                        parsed_data = json.loads(json_content)
+                        parsed_data["video_id"] = video_id
+                        
+                        output_path = os.path.join(self.transcripts_dir, f"{video_id}_transcript.json")
+                        with open(output_path, "w", encoding="utf-8") as f_out:
+                            json.dump(parsed_data, f_out, indent=2)
+                            
+                        try:
+                            gemini_client.files.delete(name=uploaded_file.name)
+                        except Exception:
+                            pass
+                            
+                        print("[OK] Successfully transcribed video using live Gemini-2.5-Flash.")
+                        return parsed_data
+                    except Exception as gemini_err:
+                        print(f"Gemini transcription fallback failed: {gemini_err}")
+                
+                if disable_fallbacks:
+                    raise api_err
+                
+                print("Trying pre-computed sample transcript fallback...")
                 # Search for any valid transcript JSON inside Movie_Clips reference dataset
                 local_ref_dir = r"c:\Projects\Movie_Clips\Transcript"
                 if os.path.exists(local_ref_dir):

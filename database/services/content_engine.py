@@ -30,6 +30,10 @@ class ContentEngine:
             clip_text = transcript.get("full_text", "")[:300]
 
         # 2. Live API structural copywriting
+        disable_fallbacks = os.getenv("DISABLE_FALLBACKS", "false").lower() == "true"
+        if disable_fallbacks and not self.client:
+            raise ValueError("Gemini Client not configured and DISABLE_FALLBACKS is active.")
+            
         if self.client and clip_text:
             prompt = (
                 "You are an expert social media copywriter for TikTok, Reels, and YouTube Shorts.\n"
@@ -52,24 +56,44 @@ class ContentEngine:
                 f"Clip Dialogue Transcript:\n{clip_text}"
             )
             
-            try:
-                response = self.client.models.generate_content(
-                    model="gemini-2.0-flash",
-                    contents=prompt
-                )
-                
-                raw_text = response.text.strip()
-                if "```json" in raw_text:
-                    json_content = raw_text.split("```json")[1].split("```")[0].strip()
-                elif "```" in raw_text:
-                    json_content = raw_text.split("```")[1].split("```")[0].strip()
-                else:
-                    json_content = raw_text
-                    
-                return json.loads(json_content)
-                
-            except Exception as e:
-                print(f"ContentEngine Gemini prompt failed: {e}. Falling back to default templates.")
+            import time
+            response = None
+            for attempt in range(4):
+                try:
+                    response = self.client.models.generate_content(
+                        model="gemini-2.5-flash",
+                        contents=prompt
+                    )
+                    break
+                except Exception as ex:
+                    if attempt < 3:
+                        sleep_time = 2 ** attempt + 1
+                        print(f"Gemini API request failed (attempt {attempt+1}/4): {ex}. Retrying in {sleep_time}s...")
+                        time.sleep(sleep_time)
+                    else:
+                        if disable_fallbacks:
+                            raise ex
+                        print(f"ContentEngine Gemini prompt failed: {ex}. Falling back to default templates.")
+                        break
+
+            if response:
+                try:
+                    raw_text = response.text.strip()
+                    if "```json" in raw_text:
+                        json_content = raw_text.split("```json")[1].split("```")[0].strip()
+                    elif "```" in raw_text:
+                        json_content = raw_text.split("```")[1].split("```")[0].strip()
+                    else:
+                        json_content = raw_text
+                        
+                    return json.loads(json_content)
+                except Exception as parse_err:
+                    if disable_fallbacks:
+                        raise parse_err
+                    print(f"Failed to parse Gemini response: {parse_err}")
+
+        if disable_fallbacks:
+            raise ValueError("Gemini Content Generation failed and fallbacks are disabled.")
 
         # 3. Offline/Default copywriting template fallback
         cleaned_cat = category.replace("#", "").strip()

@@ -575,6 +575,7 @@
     <script>
         const EMAIL = {{ email | tojson }};
         let activeJobId = null;
+        window.allClips = {};
 
         function switchSection(sectionId) {
             document.querySelectorAll('.dashboard-section').forEach(sec => sec.style.display = 'none');
@@ -702,6 +703,11 @@
         }
 
         function renderClips(clips, totalDuration) {
+            if (clips) {
+                clips.forEach(clip => {
+                    window.allClips[clip.clip_id] = clip;
+                });
+            }
             const wrap = document.getElementById('resultsWrap');
             if(!totalDuration) totalDuration = 120;
 
@@ -845,6 +851,7 @@
                 }
                 
                 data.clips.forEach(clip => {
+                    window.allClips[clip.clip_id] = clip;
                     const card = document.createElement('div');
                     card.className = 'library-card';
                     card.innerHTML = `
@@ -859,7 +866,7 @@
                             </div>
                             <div class="library-actions" style="display:flex; gap: 0.35rem; margin-top: 0.75rem;">
                                 <a class="btn btn-secondary" style="flex:1; padding: 0.4rem 0.2rem; font-size: 0.73rem; text-align: center;" href="/download/${encodeURIComponent(clip.filename)}" download>Download</a>
-                                <button class="btn btn-primary" style="flex:1; padding: 0.4rem 0.2rem; font-size: 0.73rem;" onclick="openScheduler('${clip.clip_id}', \`${(clip.ai_content?.title || 'Clip Highlight').replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`, \`${(clip.ai_content?.description || '').replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`, ${JSON.stringify(clip.ai_content?.hashtags || [])})">Schedule</button>
+                                <button class="btn btn-primary" style="flex:1; padding: 0.4rem 0.2rem; font-size: 0.73rem;" onclick="openScheduler('${clip.clip_id}')">Schedule</button>
                                 <button class="btn btn-secondary" style="padding: 0.4rem 0.4rem; font-size: 0.73rem; color: var(--red);" onclick="deleteClip('${clip.clip_id}')">Delete</button>
                             </div>
                         </div>
@@ -945,11 +952,12 @@
             }
 
             const platform = document.getElementById('qPlatform').value;
-            const time = document.getElementById('qTime').value;
-            if(!time) {
+            const timeVal = document.getElementById('qTime').value;
+            if(!timeVal) {
                 showToast('Please select a schedule date & time.');
                 return;
             }
+            const utcTime = new Date(timeVal).toISOString();
 
             const title = navQueue.getAttribute('data-target-title');
             const desc = navQueue.getAttribute('data-target-desc');
@@ -965,7 +973,7 @@
                         description: desc,
                         hashtags: tags,
                         platform: platform,
-                        schedule_time: time
+                        schedule_time: utcTime
                     })
                 });
                 
@@ -1011,10 +1019,16 @@
         let currentScheduleClip = {};
 
         function openScheduler(clipId, title, desc, tags) {
+            const clip = window.allClips[clipId] || {};
+            title = clip.ai_content?.title || clip.title || title || 'Clip Highlight';
+            desc = clip.ai_content?.description || clip.description || desc || '';
+            tags = clip.ai_content?.hashtags || clip.hashtags || tags || [];
+
             currentScheduleClip = { clipId, title, desc, tags };
-            document.getElementById('modalSchedulerClipTitle').innerText = '"' + (title || 'Clip Highlight') + '"';
+            document.getElementById('modalSchedulerClipTitle').innerText = '"' + title + '"';
             document.getElementById('mTime').value = '';
             document.getElementById('schedulerModal').style.display = 'flex';
+            showToast('Scheduler opened for: ' + title);
         }
 
         function closeSchedulerModal() {
@@ -1022,11 +1036,12 @@
         }
 
         async function submitModalToQueue() {
-            const time = document.getElementById('mTime').value;
-            if(!time) {
+            const timeVal = document.getElementById('mTime').value;
+            if(!timeVal) {
                 showToast('Please select a schedule date & time.');
                 return;
             }
+            const utcTime = new Date(timeVal).toISOString();
             const platform = document.getElementById('mPlatform').value;
             
             try {
@@ -1039,7 +1054,7 @@
                         description: currentScheduleClip.desc,
                         hashtags: currentScheduleClip.tags,
                         platform: platform,
-                        schedule_time: time
+                        schedule_time: utcTime
                     })
                 });
                 

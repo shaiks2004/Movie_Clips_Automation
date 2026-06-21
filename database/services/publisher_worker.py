@@ -30,11 +30,11 @@ def run_publisher():
         try:
             # 1. Fetch any queued items that have reached their schedule time
             db = publish_repo.db
-            now_iso = datetime.utcnow().isoformat()
+            now_utc = datetime.utcnow()
             
             pending_items = list(db["publish_queue"].find({
                 "status": "queued",
-                "schedule_time": {"$lte": now_iso}
+                "schedule_time": {"$lte": now_utc}
             }))
             
             if pending_items:

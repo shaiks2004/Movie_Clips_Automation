@@ -16,12 +16,13 @@ class RenderService:
         # Local FFmpeg / FFprobe bin paths
         self.ffmpeg_bin = "ffmpeg"
         self.ffprobe_bin = "ffprobe"
-        local_ffmpeg = os.path.join(self.base_dir, "ffmpeg.exe")
-        local_ffprobe = os.path.join(self.base_dir, "ffprobe.exe")
-        if os.path.exists(local_ffmpeg):
-            self.ffmpeg_bin = local_ffmpeg
-        if os.path.exists(local_ffprobe):
-            self.ffprobe_bin = local_ffprobe
+        if os.name == "nt":
+            local_ffmpeg = os.path.join(self.base_dir, "ffmpeg.exe")
+            local_ffprobe = os.path.join(self.base_dir, "ffprobe.exe")
+            if os.path.exists(local_ffmpeg):
+                self.ffmpeg_bin = local_ffmpeg
+            if os.path.exists(local_ffprobe):
+                self.ffprobe_bin = local_ffprobe
 
     def render_clip(self, video_path: str, start: float, end: float, clip_id: str, 
                     transcript: dict, burn_subtitles: bool = True) -> str:

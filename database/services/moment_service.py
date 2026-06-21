@@ -24,8 +24,9 @@ class MomentService:
         identifying the top viral/educational segments.
         """
         # 1. Fallback check: Search for pre-computed local files in reference directories
+        disable_fallbacks = os.getenv("DISABLE_FALLBACKS", "false").lower() == "true"
         local_ref_dir = r"c:\Projects\Movie_Clips\Metadata"
-        if os.path.exists(local_ref_dir):
+        if not disable_fallbacks and os.path.exists(local_ref_dir):
             # Try exact match first
             for file in os.listdir(local_ref_dir):
                 if video_id in file and "gemini_moments" in file:
@@ -42,6 +43,8 @@ class MomentService:
 
         # 2. Live Gemini API structural analysis
         if not self.client:
+            if disable_fallbacks:
+                raise ValueError("Gemini Client not configured and DISABLE_FALLBACKS is active.")
             print("Gemini Client not configured. Trying pre-computed sample moments fallback...")
             moments = self._fallback_to_sample_moments(video_id)
             if moments:
@@ -56,11 +59,15 @@ class MomentService:
         scenes_txt = ", ".join([str(sc["timestamp"]) for sc in scenes.get("scenes", [])])
 
         clip_target = "top 10-20 most engaging, coherent, and stand-alone highlights" if is_premium else "top 3 most engaging, coherent, and stand-alone highlights"
+        
+        target_duration_desc = "30-90 seconds long"
+        if total_duration < 45.0:
+            target_duration_desc = f"2-10 seconds long (fitting within the total video duration of {total_duration}s)"
 
         prompt = (
             "You are an expert AI social media video editor. "
             f"Your task is to analyze the following video transcript text and scene cuts, and extract the {clip_target} "
-            "(30-90 seconds long) that would perform well on TikTok, Instagram Reels, and YouTube Shorts.\n\n"
+            f"({target_duration_desc}) that would perform well on TikTok, Instagram Reels, and YouTube Shorts.\n\n"
             "For each moment, determine:\n"
             "- start_time: Float (in seconds)\n"
             "- end_time: Float (in seconds)\n"
@@ -86,13 +93,31 @@ class MomentService:
             f"Transcript:\n{segments_txt}"
         )
 
+        import time
+        response = None
+        for attempt in range(4):
+            try:
+                print(f"Invoking Gemini-2.5-Flash to evaluate highlights (attempt {attempt+1}/4)...")
+                response = self.client.models.generate_content(
+                    model="gemini-2.5-flash",
+                    contents=prompt
+                )
+                break
+            except Exception as ex:
+                if attempt < 3:
+                    sleep_time = 2 ** attempt + 1
+                    print(f"Gemini API request failed (attempt {attempt+1}/4): {ex}. Retrying in {sleep_time}s...")
+                    time.sleep(sleep_time)
+                else:
+                    if disable_fallbacks:
+                        raise ex
+                    print(f"Gemini moments request failed: {ex}. Trying pre-computed sample moments fallback...")
+                    moments = self._fallback_to_sample_moments(video_id)
+                    if moments:
+                        return moments
+                    return self._generate_default_moments(video_id, total_duration, is_premium)
+
         try:
-            print("Invoking Gemini-2.0-Flash to evaluate highlights...")
-            response = self.client.models.generate_content(
-                model="gemini-2.0-flash",
-                contents=prompt
-            )
-            
             # Extract JSON from code block
             raw_text = response.text.strip()
             if "```json" in raw_text:
@@ -111,12 +136,10 @@ class MomentService:
                 json.dump({"video_id": video_id, "moments": moments}, f, indent=2)
                 
             return moments
-
-        except Exception as e:
-            print(f"Gemini moments request failed: {e}. Trying pre-computed sample moments fallback...")
-            moments = self._fallback_to_sample_moments(video_id)
-            if moments:
-                return moments
+        except Exception as parse_err:
+            if disable_fallbacks:
+                raise parse_err
+            print(f"Failed to parse moments JSON: {parse_err}. Falling back to defaults.")
             return self._generate_default_moments(video_id, total_duration, is_premium)
 
     def _generate_default_moments(self, video_id: str, total_duration: float, is_premium: bool = False) -> list:

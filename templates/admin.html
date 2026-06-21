@@ -1,0 +1,1874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClipMood AI — Super Admin Portal</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&family=Oswald:wght@500;600&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        :root {
+            --bg: #090C15;
+            --panel-bg: #111625;
+            --border: rgba(255, 255, 255, 0.08);
+            --primary: #8B5CF6;
+            --primary-glow: rgba(139, 92, 246, 0.15);
+            --accent: #D946EF;
+            --accent-glow: rgba(217, 70, 239, 0.15);
+            --white: #F8FAFC;
+            --cream-dim: #94A3B8;
+            --red: #EF4444;
+            --green: #10B981;
+            --yellow: #F59E0B;
+            --blue: #3B82F6;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--white);
+            font-family: 'Outfit', sans-serif;
+            overflow-x: hidden;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: 250px;
+            background: var(--panel-bg);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 10;
+        }
+
+        .sidebar-header {
+            padding: 2rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo-text {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.8rem;
+            letter-spacing: 1px;
+            background: linear-gradient(135deg, var(--accent), var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .role-tag {
+            background: var(--accent-glow);
+            color: var(--accent);
+            border: 1px solid rgba(217, 70, 239, 0.3);
+            font-size: 0.65rem;
+            padding: 0.1rem 0.4rem;
+            border-radius: 4px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 1.5rem 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: var(--cream-dim);
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .sidebar-link:hover {
+            color: var(--white);
+            background: rgba(255,255,255,0.03);
+        }
+
+        .sidebar-link.active {
+            color: var(--white);
+            background: var(--primary-glow);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            box-shadow: 0 0 10px var(--primary-glow);
+        }
+
+        /* Main Workspace Container */
+        .workspace {
+            margin-left: 250px;
+            flex-grow: 1;
+            padding: 2.5rem;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .workspace-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .workspace-title h1 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .workspace-title p {
+            color: var(--cream-dim);
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+
+        /* Glass Panel Card */
+        .glass-panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+        }
+
+        /* Overview Metrics Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 120px;
+            transition: border 0.3s ease;
+        }
+
+        .stat-card:hover {
+            border-color: rgba(139, 92, 246, 0.3);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            color: var(--cream-dim);
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-val {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--white);
+            margin-top: 0.5rem;
+        }
+
+        .stat-footer {
+            margin-top: 0.5rem;
+            font-size: 0.72rem;
+        }
+
+        /* Sections Routing SPA */
+        .admin-section {
+            display: none;
+            animation: fadeIn 0.4s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Tables styling */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            margin-top: 1rem;
+        }
+
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.88rem;
+        }
+
+        .admin-table th {
+            border-bottom: 2px solid var(--border);
+            padding: 0.85rem 1rem;
+            color: var(--cream-dim);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+        }
+
+        .admin-table td {
+            border-bottom: 1px solid var(--border);
+            padding: 0.85rem 1rem;
+            vertical-align: middle;
+        }
+
+        .admin-table tbody tr:hover {
+            background: rgba(255,255,255,0.015);
+        }
+
+        /* Forms inputs */
+        .form-input {
+            background: #0f1320;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--white);
+            padding: 0.55rem 0.85rem;
+            font-family: inherit;
+            font-size: 0.85rem;
+            outline: none;
+            width: 100%;
+            transition: border 0.2s ease;
+        }
+
+        .form-input:focus {
+            border-color: var(--primary);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 0.8rem;
+            padding: 0.5rem 1rem;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.25s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background: #7c3aed;
+            box-shadow: 0 0 10px rgba(139, 92, 246, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--white);
+            border-color: var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--red);
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+
+        .btn-danger:hover {
+            background: var(--red);
+            color: var(--white);
+        }
+
+        /* Badge status indicators */
+        .badge {
+            display: inline-flex;
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        .badge-green { background: rgba(16, 185, 129, 0.12); color: var(--green); border: 1px solid rgba(16, 185, 129, 0.2); }
+        .badge-yellow { background: rgba(245, 158, 11, 0.12); color: var(--yellow); border: 1px solid rgba(245, 158, 11, 0.2); }
+        .badge-red { background: rgba(239, 68, 68, 0.12); color: var(--red); border: 1px solid rgba(239, 68, 68, 0.2); }
+        .badge-blue { background: rgba(59, 130, 246, 0.12); color: var(--blue); border: 1px solid rgba(59, 130, 246, 0.2); }
+
+        /* Health grid */
+        .health-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .health-card {
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .health-indicator {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .health-indicator::after {
+            content: '';
+            position: absolute;
+            top: -3px; left: -3px; right: -3px; bottom: -3px;
+            border-radius: 50%;
+            border: 2px solid currentColor;
+            opacity: 0.4;
+            animation: pulse 1.8s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.6; }
+            100% { transform: scale(1.6); opacity: 0; }
+        }
+
+        /* Toast Element */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: #1e1b4b;
+            border-left: 4px solid var(--primary);
+            color: var(--white);
+            padding: 1rem 1.5rem;
+            border-radius: 4px;
+            font-size: 0.88rem;
+            font-weight: 500;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transform: translateY(150%);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 999;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+        }
+
+        /* Logs Console Box */
+        .logs-box {
+            background: #070911;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 1.5rem;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 0.8rem;
+            line-height: 1.6;
+            color: #a7f3d0;
+            height: 450px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        
+        /* Modal Popup Backdrop */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-body {
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            padding: 2rem;
+            position: relative;
+        }
+
+        /* Charts styling block */
+        .charts-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .chart-card {
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            height: 320px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <span class="logo-text">ClipMood AI</span>
+            <span class="role-tag">Super Admin</span>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a class="sidebar-link" id="nav-dashboard" onclick="switchSection('dashboard')">📊 Executive Dashboard</a></li>
+            <li><a class="sidebar-link" id="nav-users" onclick="switchSection('users')">👥 User Profiles</a></li>
+            <li><a class="sidebar-link" id="nav-videos" onclick="switchSection('videos')">🎬 Video Pipeline</a></li>
+            <li><a class="sidebar-link" id="nav-clips" onclick="switchSection('clips')">🎞️ Generated Highlights</a></li>
+            <li><a class="sidebar-link" id="nav-queue" onclick="switchSection('queue')">📅 Publishing Queue</a></li>
+            <li><a class="sidebar-link" id="nav-health" onclick="switchSection('health')">❤️ System Health</a></li>
+            <li><a class="sidebar-link" id="nav-usage" onclick="switchSection('usage')">🔌 API & Quota Monitor</a></li>
+            <li><a class="sidebar-link" id="nav-analytics" onclick="switchSection('analytics')">📈 Advanced Analytics</a></li>
+            <li><a class="sidebar-link" id="nav-logs" onclick="switchSection('logs')">📝 System Logs Console</a></li>
+            <li><a class="sidebar-link" id="nav-settings" onclick="switchSection('settings')">⚙️ Provider Credentials</a></li>
+        </ul>
+        <div style="padding: 1.5rem 1rem; border-top: 1px solid var(--border); font-size: 0.8rem; color: var(--cream-dim);">
+            Logged in as:<br>
+            <span id="currentAdminEmail" style="color: var(--white); font-weight: 500;">admin@clipmood.com</span>
+        </div>
+    </aside>
+
+    <!-- MAIN WORKSPACE -->
+    <main class="workspace">
+        
+        <header class="workspace-header">
+            <div class="workspace-title">
+                <h1 id="activeTitle">Executive Dashboard</h1>
+                <p id="activeSubtitle">ClipMood core status, server volumes, and engine health analytics.</p>
+            </div>
+            <div style="display:flex; gap: 0.75rem;">
+                <button class="btn btn-secondary" onclick="refreshActiveTab()">🔄 Sync Data</button>
+                <button class="btn btn-primary" onclick="window.location.href='/tool?email=' + encodeURIComponent(EMAIL)">🌐 User Workspace</button>
+            </div>
+        </header>
+
+        <!-- SECTION: EXECUTIVE DASHBOARD -->
+        <section id="dashboard" class="admin-section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-header"><span>Total Users</span><span>👥</span></div>
+                    <div class="stat-val" id="stat-total-users">0</div>
+                    <div class="stat-footer" style="color: var(--green);" id="premium-ratio">0% premium users</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header"><span>Premium Accounts</span><span>💎</span></div>
+                    <div class="stat-val" id="stat-premium-users">0</div>
+                    <div class="stat-footer" style="color: var(--accent);">UPI / Direct activations</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header"><span>Videos Uploaded</span><span>📹</span></div>
+                    <div class="stat-val" id="stat-videos-count">0</div>
+                    <div class="stat-footer" id="videos-processing-badge">0 currently processing</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header"><span>Clips Generated</span><span>✂️</span></div>
+                    <div class="stat-val" id="stat-clips-count">0</div>
+                    <div class="stat-footer" id="avg-clips-ratio">0 clips per video</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header"><span>Queue Load</span><span>📅</span></div>
+                    <div class="stat-val" id="stat-queued-count">0</div>
+                    <div class="stat-footer" id="publishing-worker-tag" style="color: var(--green);">Daemon poller active</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header"><span>Failed Jobs</span><span>⚠️</span></div>
+                    <div class="stat-val" id="stat-failed-count" style="color: var(--red);">0</div>
+                    <div class="stat-footer" id="failure-ratio">0% pipeline error rate</div>
+                </div>
+                <div class="stat-card" style="border-color: var(--accent-glow);">
+                    <div class="stat-header"><span>Est. Revenue</span><span>💰</span></div>
+                    <div class="stat-val" id="stat-revenue" style="background: linear-gradient(135deg, var(--accent), var(--primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">₹0</div>
+                    <div class="stat-footer" style="color: var(--cream-dim);">Based on premium upgrades</div>
+                </div>
+            </div>
+
+            <div class="glass-panel" style="margin-top: 1.5rem;">
+                <h3>Active Operations Alert Center</h3>
+                <div id="alert-logs" style="margin-top: 1rem; display:flex; flex-direction:column; gap: 0.75rem;">
+                    <!-- Notifications populated dynamically -->
+                    <div style="color:var(--cream-dim); font-size:0.85rem;">Checking systems status...</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: USER PROFILES -->
+        <section id="users" class="admin-section">
+            <div class="glass-panel">
+                <div style="display:flex; justify-content:space-between; align-items:center; gap: 1rem; flex-wrap:wrap;">
+                    <div style="display:flex; gap: 0.75rem; flex-grow:1; max-width:500px;">
+                        <input type="text" id="userSearch" class="form-input" placeholder="Search emails..." oninput="loadUsers()"/>
+                        <select id="userFilter" class="form-input" style="max-width: 150px;" onchange="loadUsers()">
+                            <option value="">All Tiers</option>
+                            <option value="premium">Premium Only</option>
+                            <option value="free">Free Only</option>
+                            <option value="admin">Administrators</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" onclick="openAddUserModal()">➕ Add User</button>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>User Email</th>
+                                <th>Created Date</th>
+                                <th>Billing Tier</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th style="text-align:right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            <!-- Filled dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: VIDEO PIPELINE -->
+        <section id="videos" class="admin-section">
+            <div class="glass-panel">
+                <div style="margin-bottom:1.5rem; display:flex; gap: 0.75rem; max-width:350px;">
+                    <select id="videoStatusFilter" class="form-input" onchange="loadVideos()">
+                        <option value="">All Upload States</option>
+                        <option value="done">Completed (Done)</option>
+                        <option value="processing">Processing</option>
+                        <option value="transcribing">Transcribing</option>
+                        <option value="detecting scenes">Scene Cuts</option>
+                        <option value="detecting moments">Moment Ranking</option>
+                        <option value="rendering clips">FFmpeg Slicing</option>
+                        <option value="error">Failed (Error)</option>
+                    </select>
+                </div>
+                <div class="table-responsive">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Video ID</th>
+                                <th>Filename</th>
+                                <th>Owner Email</th>
+                                <th>Duration</th>
+                                <th>Status</th>
+                                <th>Progress</th>
+                                <th>Created</th>
+                                <th style="text-align:right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="videosTableBody">
+                            <!-- Filled dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: GENERATED HIGHLIGHTS -->
+        <section id="clips" class="admin-section">
+            <div class="glass-panel">
+                <div class="table-responsive">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Clip ID</th>
+                                <th>Source Video ID</th>
+                                <th>Highlight Category</th>
+                                <th>Virality Score</th>
+                                <th>Length</th>
+                                <th>AI Title Header</th>
+                                <th style="text-align:right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="clipsTableBody">
+                            <!-- Filled dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: PUBLISHING QUEUE -->
+        <section id="queue" class="admin-section">
+            <div class="glass-panel">
+                <div class="table-responsive">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Queue ID</th>
+                                <th>Destination</th>
+                                <th>Schedule Time (Local)</th>
+                                <th>Publish Status</th>
+                                <th>AI Title</th>
+                                <th style="text-align:right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="queueTableBody">
+                            <!-- Filled dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: SYSTEM HEALTH -->
+        <section id="health" class="admin-section">
+            <div class="health-grid">
+                <div class="health-card">
+                    <div>
+                        <h4 style="font-size:1rem; font-weight:600;">MongoDB Connection</h4>
+                        <p style="color:var(--cream-dim); font-size:0.78rem; margin-top:0.25rem;" id="db-health-detail">Checking connection...</p>
+                    </div>
+                    <div class="health-indicator" id="health-db" style="color: var(--yellow);"></div>
+                </div>
+                <div class="health-card">
+                    <div>
+                        <h4 style="font-size:1rem; font-weight:600;">Google Gemini API</h4>
+                        <p style="color:var(--cream-dim); font-size:0.78rem; margin-top:0.25rem;" id="gemini-health-detail">Checking model access...</p>
+                    </div>
+                    <div class="health-indicator" id="health-gemini" style="color: var(--yellow);"></div>
+                </div>
+                <div class="health-card">
+                    <div>
+                        <h4 style="font-size:1rem; font-weight:600;">OpenAI Whisper API</h4>
+                        <p style="color:var(--cream-dim); font-size:0.78rem; margin-top:0.25rem;" id="whisper-health-detail">Checking keys validation...</p>
+                    </div>
+                    <div class="health-indicator" id="health-whisper" style="color: var(--yellow);"></div>
+                </div>
+                <div class="health-card">
+                    <div>
+                        <h4 style="font-size:1rem; font-weight:600;">FFmpeg Slicer Binary</h4>
+                        <p style="color:var(--cream-dim); font-size:0.78rem; margin-top:0.25rem;" id="ffmpeg-health-detail">Locating binary...</p>
+                    </div>
+                    <div class="health-indicator" id="health-ffmpeg" style="color: var(--yellow);"></div>
+                </div>
+                <div class="health-card">
+                    <div>
+                        <h4 style="font-size:1rem; font-weight:600;">Publisher Poller Thread</h4>
+                        <p style="color:var(--cream-dim); font-size:0.78rem; margin-top:0.25rem;" id="poller-health-detail">Monitoring daemon...</p>
+                    </div>
+                    <div class="health-indicator" id="health-poller" style="color: var(--yellow);"></div>
+                </div>
+            </div>
+
+            <div class="glass-panel" style="margin-top: 1.5rem;">
+                <h3>System Hardware Resources</h3>
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-top:1.5rem;">
+                    <div>
+                        <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:0.4rem;">
+                            <span>CPU Usage</span><span id="resCpuText">0%</span>
+                        </div>
+                        <div style="height:8px; background:rgba(255,255,255,0.05); border-radius:4px; overflow:hidden;">
+                            <div id="resCpuBar" style="height:100%; width:0%; background:var(--primary); transition:width 0.4s ease;"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:0.4rem;">
+                            <span>Memory Load (RAM)</span><span id="resRamText">0%</span>
+                        </div>
+                        <div style="height:8px; background:rgba(255,255,255,0.05); border-radius:4px; overflow:hidden;">
+                            <div id="resRamBar" style="height:100%; width:0%; background:var(--accent); transition:width 0.4s ease;"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:0.4rem;">
+                            <span>Disk Partition Capacity</span><span id="resDiskText">0% Used</span>
+                        </div>
+                        <div style="height:8px; background:rgba(255,255,255,0.05); border-radius:4px; overflow:hidden;">
+                            <div id="resDiskBar" style="height:100%; width:0%; background:var(--blue); transition:width 0.4s ease;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: API & QUOTA MONITOR -->
+        <section id="usage" class="admin-section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-header"><span>Gemini API Status</span><span>🔑</span></div>
+                    <div class="stat-val" id="api-gemini-status">Active</div>
+                    <div class="stat-footer" id="api-gemini-speed">Latency: --ms</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header"><span>Whisper API Status</span><span>🔑</span></div>
+                    <div class="stat-val" id="api-whisper-status">Active</div>
+                    <div class="stat-footer" id="whisper-audio-minutes">0 audio mins processed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header"><span>API Requests Today</span><span>⚡</span></div>
+                    <div class="stat-val" id="stat-daily-req">0</div>
+                    <div class="stat-footer">Monthly total: <span id="stat-monthly-req">0</span></div>
+                </div>
+            </div>
+            
+            <div class="glass-panel" style="margin-top: 1.5rem;" id="credits-card">
+                <h3 style="color:var(--accent);">Credits & Expenses Management</h3>
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; margin-top:1.5rem;">
+                    <div>
+                        <h4 style="font-size:0.9rem; font-weight:500;">Gemini 2.0 Flash Forecasts</h4>
+                        <div style="font-size: 1.8rem; font-weight: bold; margin: 0.5rem 0;" id="gemini-credits">--</div>
+                        <p style="font-size:0.75rem; color:var(--cream-dim);" id="gemini-burn-rate">Low credit warnings activate below $2.00</p>
+                    </div>
+                    <div>
+                        <h4 style="font-size:0.9rem; font-weight:500;">OpenAI API Audio Budget</h4>
+                        <div style="font-size: 1.8rem; font-weight: bold; margin: 0.5rem 0;" id="whisper-credits">--</div>
+                        <p style="font-size:0.75rem; color:var(--cream-dim);">Auto-charged pay-as-you-go balance</p>
+                    </div>
+                    <div>
+                        <h4 style="font-size:0.9rem; font-weight:500;">System Storage Load</h4>
+                        <div style="font-size: 1.8rem; font-weight: bold; margin: 0.5rem 0;" id="storage-space-val">0.0 GB</div>
+                        <p style="font-size:0.75rem; color:var(--cream-dim);" id="storage-details">Calculated across uploads & clips</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: ADVANCED ANALYTICS -->
+        <section id="analytics" class="admin-section">
+            <div class="charts-container">
+                <div class="chart-card">
+                    <h4 style="font-size:0.9rem; font-weight:600; text-transform:uppercase; color:var(--cream-dim);">User Growth Trend (SaaS Registrations)</h4>
+                    <div style="position:relative; height:240px; margin-top:1rem;">
+                        <canvas id="userGrowthChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h4 style="font-size:0.9rem; font-weight:600; text-transform:uppercase; color:var(--cream-dim);">Video Processing Volume (Uploads)</h4>
+                    <div style="position:relative; height:240px; margin-top:1rem;">
+                        <canvas id="videoUploadsChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h4 style="font-size:0.9rem; font-weight:600; text-transform:uppercase; color:var(--cream-dim);">Most Popular Clip Categories (Mood)</h4>
+                    <div style="position:relative; height:240px; margin-top:1rem;">
+                        <canvas id="moodCategoryChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h4 style="font-size:0.9rem; font-weight:600; text-transform:uppercase; color:var(--cream-dim);">API Tokens Consumption Forecast</h4>
+                    <div style="position:relative; height:240px; margin-top:1rem;">
+                        <canvas id="apiTokensChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: SYSTEM LOGS -->
+        <section id="logs" class="admin-section">
+            <div class="glass-panel">
+                <div style="display:flex; gap: 0.75rem; align-items:center; margin-bottom:1rem; flex-wrap:wrap;">
+                    <input type="text" id="logSearch" class="form-input" placeholder="Filter console logs (e.g. error, task)..." style="max-width:350px;" oninput="filterLogs()"/>
+                    <select id="logSeverity" class="form-input" style="max-width:150px;" onchange="filterLogs()">
+                        <option value="">All Severities</option>
+                        <option value="ERROR">Errors only</option>
+                        <option value="WARNING">Warnings</option>
+                        <option value="PUBLISHER">Publisher Daemon</option>
+                        <option value="OK">OK Success logs</option>
+                    </select>
+                    <button class="btn btn-secondary" onclick="loadLogs()">🔄 Reload Logs</button>
+                </div>
+                <div class="logs-box" id="logsTerminal">Loading system log console...</div>
+            </div>
+        </section>
+
+        <!-- SECTION: CREDENTIALS SETTINGS -->
+        <section id="settings" class="admin-section">
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.5rem;">
+                <div class="glass-panel">
+                    <h3>Rotate API Keys</h3>
+                    <p style="color:var(--cream-dim); font-size:0.8rem; margin-top:0.25rem;">Replacing values updates active environment variables instantly.</p>
+                    
+                    <div style="margin-top:1.5rem; display:flex; flex-direction:column; gap:1.25rem;">
+                        <div class="field">
+                            <label style="font-size:0.8rem; color:var(--cream-dim);">Google Gemini API Key</label>
+                            <input type="password" id="setGeminiKey" class="form-input" style="margin-top:0.35rem;" placeholder="••••••••••••••••••••••••" />
+                        </div>
+                        <div class="field">
+                            <label style="font-size:0.8rem; color:var(--cream-dim);">OpenAI Whisper API Key</label>
+                            <input type="password" id="setOpenAIKey" class="form-input" style="margin-top:0.35rem;" placeholder="••••••••••••••••••••••••" />
+                        </div>
+                        <div class="field">
+                            <label style="font-size:0.8rem; color:var(--cream-dim);">Admin Secret Token</label>
+                            <input type="password" id="setAdminSecret" class="form-input" style="margin-top:0.35rem;" placeholder="••••••••••••••••••••••••" />
+                        </div>
+                        <button class="btn btn-primary" onclick="submitKeysUpdate()" style="margin-top:0.5rem; width:100%;">Rotate Credentials</button>
+                    </div>
+                </div>
+
+                <div class="glass-panel">
+                    <h3>Model Provider Settings</h3>
+                    <p style="color:var(--cream-dim); font-size:0.8rem; margin-top:0.25rem;">Configure provider routing and activation flags.</p>
+                    
+                    <div style="margin-top:1.5rem; display:flex; flex-direction:column; gap:1.25rem;">
+                        <div class="field">
+                            <label style="font-size:0.8rem; color:var(--cream-dim);">AI Highlights Engine</label>
+                            <select id="setHighlightProvider" class="form-input" style="margin-top:0.35rem;">
+                                <option value="gemini">Google Gemini 2.0 Flash (Recommended)</option>
+                                <option value="openai">OpenAI GPT-4o-mini</option>
+                                <option value="claude" disabled>Anthropic Claude 3.5 Sonnet (Future Support)</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label style="font-size:0.8rem; color:var(--cream-dim);">Disable Fallbacks Mode (Audit Validation)</label>
+                            <select id="setDisableFallbacks" class="form-input" style="margin-top:0.35rem;">
+                                <option value="true">Active (Bypass local datasets, force API check)</option>
+                                <option value="false">Inactive (Allow offline reference copy fallbacks)</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label style="font-size:0.8rem; color:var(--cream-dim);">Facebook Sandbox publishing</label>
+                            <select id="setFacebookSandbox" class="form-input" style="margin-top:0.35rem;">
+                                <option value="mock">Simulate uploads (Mock mode)</option>
+                                <option value="live">Live Page upload (Requires Graph tokens)</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary" onclick="submitProviderUpdate()" style="margin-top:0.5rem; width:100%;">Update Providers</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL: ADD USER -->
+    <div id="addUserModal" class="modal">
+        <div class="modal-body">
+            <span style="position:absolute; right:1.5rem; top:1rem; font-size:1.8rem; cursor:pointer; color:var(--cream-dim);" onclick="closeAddUserModal()">&times;</span>
+            <h3 style="color:var(--primary); font-family: 'Oswald', sans-serif; text-transform:uppercase;">Register New User</h3>
+            
+            <div style="margin-top:1.5rem; display:flex; flex-direction:column; gap:1.25rem;">
+                <div class="field">
+                    <label style="font-size:0.8rem; color:var(--cream-dim);">Email Address</label>
+                    <input type="email" id="newEmail" class="form-input" placeholder="user@gmail.com" style="margin-top:0.3rem;" />
+                </div>
+                <div class="field">
+                    <label style="font-size:0.8rem; color:var(--cream-dim);">User Role</label>
+                    <select id="newRole" class="form-input" style="margin-top:0.3rem;">
+                        <option value="free">Free User</option>
+                        <option value="premium">Premium User</option>
+                        <option value="admin">Administrator</option>
+                        <option value="super_admin">Super Administrator</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" onclick="submitAddUser()" style="width:100%; margin-top:0.5rem;">Create Account</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: PREVIEW CLIP & REGENERATE AI CONTENT -->
+    <div id="clipDetailModal" class="modal">
+        <div class="modal-body" style="max-width: 600px;">
+            <span style="position:absolute; right:1.5rem; top:1rem; font-size:1.8rem; cursor:pointer; color:var(--cream-dim);" onclick="closeClipDetailModal()">&times;</span>
+            <h3 style="color:var(--accent); font-family: 'Oswald', sans-serif; text-transform:uppercase;" id="modalClipHeader">Clip Metadata</h3>
+            
+            <div style="margin-top:1.5rem; display:flex; flex-direction:column; gap:1.25rem;">
+                <div class="field">
+                    <label style="font-size:0.8rem; color:var(--cream-dim);">AI Title</label>
+                    <input type="text" id="modalClipTitle" class="form-input" style="margin-top:0.3rem;" />
+                </div>
+                <div class="field">
+                    <label style="font-size:0.8rem; color:var(--cream-dim);">AI Description Caption</label>
+                    <textarea id="modalClipDesc" class="form-input" style="margin-top:0.3rem; height:80px; resize:none;"></textarea>
+                </div>
+                <div class="field">
+                    <label style="font-size:0.8rem; color:var(--cream-dim);">Hashtags (Comma Separated)</label>
+                    <input type="text" id="modalClipTags" class="form-input" style="margin-top:0.3rem;" />
+                </div>
+                
+                <div style="display:flex; gap:0.75rem; margin-top:0.5rem;">
+                    <button class="btn btn-secondary" onclick="submitClipMetadataSave()" style="flex:1;">Save Edits</button>
+                    <button class="btn btn-primary" onclick="regenerateClipAI()" id="btnRegenAI" style="flex:1;">✨ Regenerate AI</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div class="toast" id="toast"></div>
+
+    <!-- SPA JS JAVASCRIPT -->
+    <script>
+        const EMAIL = {{ email | tojson }};
+        const ACTIVE_SECTION = {{ active_section | tojson }};
+        
+        document.getElementById('currentAdminEmail').innerText = EMAIL;
+
+        // Global sections tabs
+        let activeTab = 'dashboard';
+        let charts = {};
+
+        function switchSection(sectionId) {
+            document.querySelectorAll('.admin-section').forEach(sec => sec.style.display = 'none');
+            document.querySelectorAll('.sidebar-link').forEach(link => link.classList.remove('active'));
+            
+            document.getElementById(sectionId).style.display = 'block';
+            document.getElementById('nav-' + sectionId).classList.add('active');
+            activeTab = sectionId;
+
+            // Update title
+            const headers = {
+                'dashboard': ['Executive Dashboard', 'ClipMood core status, server volumes, and engine health analytics.'],
+                'users': ['User Profiles', 'Manage client account tiers, verify UPI upgrades, and check usage quotas.'],
+                'videos': ['Video Pipeline', 'Monitor long-form video processing, track progress percentage, and retry failed jobs.'],
+                'clips': ['Generated Highlights', 'View clip slices, preview subtitles, and edit AI copywriting captions.'],
+                'queue': ['Publishing Queue', 'Direct social media queue scheduler, check retries, or trigger manual posting.'],
+                'health': ['System Health Monitor', 'Real-time indicators for database connections, API latency, resources, and daemons.'],
+                'usage': ['API & Quota Monitor', 'Pulls token usage, remaining credits threshold forecasts, and storage space metrics.'],
+                'analytics': ['Advanced Analytics Board', 'Visual charts on registry grow rates, processed bandwidth, and clip categories.'],
+                'logs': ['System Logs Console', 'Query the central terminal log output of Flask and publisher daemon workers.'],
+                'settings': ['Provider Credentials', 'Rotate active API secrets, switch providers, and toggle validation safety flags.']
+            };
+
+            const data = headers[sectionId];
+            document.getElementById('activeTitle').innerText = data[0];
+            document.getElementById('activeSubtitle').innerText = data[1];
+
+            // Trigger specific page data fetcher
+            if(sectionId === 'dashboard') loadDashboard();
+            else if(sectionId === 'users') loadUsers();
+            else if(sectionId === 'videos') loadVideos();
+            else if(sectionId === 'clips') loadClips();
+            else if(sectionId === 'queue') loadQueue();
+            else if(sectionId === 'health') loadSystemHealth();
+            else if(sectionId === 'usage') loadApiUsage();
+            else if(sectionId === 'analytics') loadAnalyticsCharts();
+            else if(sectionId === 'logs') loadLogs();
+            else if(sectionId === 'settings') loadSettings();
+
+            // Push History State silently to match route
+            if(window.location.pathname !== '/admin/' + sectionId && sectionId !== 'dashboard') {
+                window.history.pushState(null, '', '/admin/' + sectionId + '?email=' + encodeURIComponent(EMAIL));
+            } else if (sectionId === 'dashboard' && window.location.pathname !== '/admin') {
+                window.history.pushState(null, '', '/admin?email=' + encodeURIComponent(EMAIL));
+            }
+        }
+
+        // Initialize active tab prefilled from server template
+        if(ACTIVE_SECTION && ACTIVE_SECTION !== 'admin') {
+            switchSection(ACTIVE_SECTION);
+        } else {
+            switchSection('dashboard');
+        }
+
+        function refreshActiveTab() {
+            switchSection(activeTab);
+            showToast('Sync completed for ' + activeTab);
+        }
+
+        // Toast Helper
+        let toastTimer;
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+        }
+
+        // 1. EXECUTIVE DASHBOARD DATA LOAD
+        async function loadDashboard() {
+            try {
+                const res = await fetch(`/api/admin/dashboard?email=${encodeURIComponent(EMAIL)}`);
+                const data = await res.json();
+                
+                document.getElementById('stat-total-users').textContent = data.total_users || 0;
+                document.getElementById('stat-premium-users').textContent = data.premium_users || 0;
+                document.getElementById('stat-videos-count').textContent = data.total_videos || 0;
+                document.getElementById('stat-clips-count').textContent = data.total_clips || 0;
+                document.getElementById('stat-queued-count').textContent = data.queued_count || 0;
+                document.getElementById('stat-failed-count').textContent = data.failed_jobs || 0;
+                document.getElementById('stat-revenue').textContent = '₹' + (data.revenue || 0);
+
+                // Footer ratios
+                const premiumRatio = data.total_users ? Math.round((data.premium_users / data.total_users) * 100) : 0;
+                document.getElementById('premium-ratio').textContent = premiumRatio + '% premium accounts';
+
+                const errorRatio = data.total_videos ? Math.round((data.failed_jobs / data.total_videos) * 100) : 0;
+                document.getElementById('failure-ratio').textContent = errorRatio + '% pipeline error rate';
+                
+                const clipsRatio = data.total_videos ? (data.total_clips / data.total_videos).toFixed(1) : 0;
+                document.getElementById('avg-clips-ratio').textContent = clipsRatio + ' clips per video';
+
+                document.getElementById('videos-processing-badge').textContent = (data.processing_count || 0) + ' currently processing';
+
+                // Health checks alert panel
+                const alertsBox = document.getElementById('alert-logs');
+                alertsBox.innerHTML = '';
+                
+                if (data.alerts && data.alerts.length) {
+                    data.alerts.forEach(alert => {
+                        const alertDiv = document.createElement('div');
+                        alertDiv.className = 'flow-step';
+                        alertDiv.style.background = 'rgba(239, 68, 68, 0.05)';
+                        alertDiv.style.border = '1px solid rgba(239, 68, 68, 0.15)';
+                        alertDiv.style.borderRadius = '4px';
+                        alertDiv.style.padding = '0.75rem 1rem';
+                        alertDiv.style.display = 'flex';
+                        alertDiv.style.justifyContent = 'space-between';
+                        alertDiv.style.alignItems = 'center';
+                        
+                        alertDiv.innerHTML = `
+                            <span style="font-size:0.85rem; color:var(--red); font-weight: 500;">🚨 ${alert}</span>
+                            <span style="font-size:0.7rem; color:var(--cream-dim);">High Severity</span>
+                        `;
+                        alertsBox.appendChild(alertDiv);
+                    });
+                } else {
+                    alertsBox.innerHTML = `
+                        <div style="background: rgba(16, 185, 129, 0.04); border: 1px solid rgba(16, 185, 129, 0.15); padding: 1rem; border-radius: 4px; color: var(--green); font-size: 0.85rem; font-weight:500;">
+                            ✅ All core systems reporting fully functional. No active credit, server, or database connection warnings.
+                        </div>
+                    `;
+                }
+            } catch(e) {
+                showToast('Failed to fetch dashboard metrics.');
+            }
+        }
+
+        // 2. USER MANAGEMENT
+        async function loadUsers() {
+            const tbody = document.getElementById('usersTableBody');
+            tbody.innerHTML = '<tr><td colspan="6" style="color:var(--cream-dim);">Loading accounts table...</td></tr>';
+            
+            const search = document.getElementById('userSearch').value;
+            const filter = document.getElementById('userFilter').value;
+
+            try {
+                const res = await fetch(`/api/admin/users?email=${encodeURIComponent(EMAIL)}&search=${encodeURIComponent(search)}&filter=${encodeURIComponent(filter)}`);
+                const data = await res.json();
+                
+                tbody.innerHTML = '';
+                if(!data.users || !data.users.length) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="color:var(--cream-dim);">No users found.</td></tr>';
+                    return;
+                }
+
+                data.users.forEach(user => {
+                    const tr = document.createElement('tr');
+                    const createdDate = user.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A';
+                    
+                    const tierBadge = user.is_premium ? 
+                        '<span class="badge badge-green">Premium</span>' : 
+                        '<span class="badge badge-blue">Free Tier</span>';
+                        
+                    const roleBadge = user.role === 'super_admin' ?
+                        '<span class="badge badge-red">Super Admin</span>' :
+                        (user.role === 'admin' ? '<span class="badge badge-yellow">Admin</span>' : '<span class="badge badge-blue">User</span>');
+                        
+                    const statusText = user.is_suspended ? 
+                        '<span class="badge badge-red">Suspended</span>' : 
+                        '<span class="badge badge-green">Active</span>';
+
+                    const toggleBtnText = user.is_premium ? 'Downgrade' : 'Upgrade Premium';
+                    const suspendBtnText = user.is_suspended ? 'Unsuspend' : 'Suspend';
+                    const toggleBtnClass = user.is_premium ? 'btn-secondary' : 'btn-primary';
+
+                    tr.innerHTML = `
+                        <td style="font-weight: 500;">${user.email}</td>
+                        <td style="color:var(--cream-dim);">${createdDate}</td>
+                        <td>${tierBadge}</td>
+                        <td>${roleBadge}</td>
+                        <td>${statusText}</td>
+                        <td style="text-align:right; display:flex; gap:0.4rem; justify-content:flex-end;">
+                            <button class="btn ${toggleBtnClass}" style="padding:0.3rem 0.6rem; font-size:0.7rem;" onclick="toggleUserPremium('${user.email}')">${toggleBtnText}</button>
+                            <button class="btn btn-secondary" style="padding:0.3rem 0.6rem; font-size:0.7rem;" onclick="toggleUserSuspension('${user.email}', ${!user.is_suspended})">${suspendBtnText}</button>
+                            <button class="btn btn-danger" style="padding:0.3rem 0.6rem; font-size:0.7rem;" onclick="deleteUserAccount('${user.email}')">Delete</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch(e) {
+                tbody.innerHTML = '<tr><td colspan="6" style="color:var(--red);">Error loading users.</td></tr>';
+            }
+        }
+
+        async function toggleUserPremium(userEmail) {
+            try {
+                const res = await fetch('/api/admin/users/action', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        email: EMAIL,
+                        target_email: userEmail,
+                        action: 'toggle_premium'
+                    })
+                });
+                const rData = await res.json();
+                if(res.ok) {
+                    showToast('Billing tier updated for ' + userEmail);
+                    loadUsers();
+                } else {
+                    showToast(rData.error || 'Failed to update billing.');
+                }
+            } catch(e) {
+                showToast('API connection error.');
+            }
+        }
+
+        async function toggleUserSuspension(userEmail, isSuspended) {
+            try {
+                const res = await fetch('/api/admin/users/action', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        email: EMAIL,
+                        target_email: userEmail,
+                        action: 'toggle_suspension',
+                        is_suspended: isSuspended
+                    })
+                });
+                if(res.ok) {
+                    showToast('User status updated.');
+                    loadUsers();
+                }
+            } catch(e) {}
+        }
+
+        async function deleteUserAccount(userEmail) {
+            if(!confirm('Are you sure you want to completely delete user account: ' + userEmail + '? All uploaded files and clip libraries will be lost!')) return;
+            try {
+                const res = await fetch('/api/admin/users/action', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        email: EMAIL,
+                        target_email: userEmail,
+                        action: 'delete'
+                    })
+                });
+                if(res.ok) {
+                    showToast('Account deleted: ' + userEmail);
+                    loadUsers();
+                }
+            } catch(e) {}
+        }
+
+        // Modals User
+        function openAddUserModal() {
+            document.getElementById('newEmail').value = '';
+            document.getElementById('addUserModal').style.display = 'flex';
+        }
+        function closeAddUserModal() {
+            document.getElementById('addUserModal').style.display = 'none';
+        }
+        async function submitAddUser() {
+            const emailVal = document.getElementById('newEmail').value.trim();
+            const roleVal = document.getElementById('newRole').value;
+            if(!emailVal) {
+                showToast('Please enter a valid email.');
+                return;
+            }
+            try {
+                const res = await fetch('/api/admin/users/action', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        email: EMAIL,
+                        target_email: emailVal,
+                        role: roleVal,
+                        action: 'create'
+                    })
+                });
+                const rData = await res.json();
+                if(res.ok) {
+                    showToast('Account registered successfully.');
+                    closeAddUserModal();
+                    loadUsers();
+                } else {
+                    showToast(rData.error || 'Failed to create user.');
+                }
+            } catch(_) {}
+        }
+
+        // 3. VIDEO PIPELINE
+        async function loadVideos() {
+            const tbody = document.getElementById('videosTableBody');
+            tbody.innerHTML = '<tr><td colspan="8" style="color:var(--cream-dim);">Loading processing pipeline...</td></tr>';
+            
+            const filter = document.getElementById('videoStatusFilter').value;
+
+            try {
+                const res = await fetch(`/api/admin/videos?email=${encodeURIComponent(EMAIL)}&filter=${encodeURIComponent(filter)}`);
+                const data = await res.json();
+                
+                tbody.innerHTML = '';
+                if(!data.videos || !data.videos.length) {
+                    tbody.innerHTML = '<tr><td colspan="8" style="color:var(--cream-dim);">No videos processing.</td></tr>';
+                    return;
+                }
+
+                data.videos.forEach(v => {
+                    const tr = document.createElement('tr');
+                    const date = v.created_at ? new Date(v.created_at).toLocaleDateString() : 'N/A';
+                    
+                    let statusBadge = '';
+                    if(v.status === 'done') statusBadge = '<span class="badge badge-green">Done</span>';
+                    else if (v.status === 'error') statusBadge = '<span class="badge badge-red">Failed</span>';
+                    else statusBadge = `<span class="badge badge-yellow">${v.status.toUpperCase()}</span>`;
+
+                    tr.innerHTML = `
+                        <td style="font-family: monospace;">${v.video_id}</td>
+                        <td style="font-weight:500; max-width: 150px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${v.filename}">${v.filename}</td>
+                        <td>${v.uploaded_by}</td>
+                        <td style="color:var(--cream-dim);">${v.total_duration ? Math.round(v.total_duration) + 's' : '--'}</td>
+                        <td>${statusBadge}</td>
+                        <td>
+                            <div style="display:flex; align-items:center; gap:0.5rem; font-size:0.75rem;">
+                                <div style="height:6px; width:50px; background:rgba(255,255,255,0.05); border-radius:3px; overflow:hidden;">
+                                    <div style="height:100%; width:${v.progress || 0}%; background:var(--primary);"></div>
+                                </div>
+                                <span>${v.progress || 0}%</span>
+                            </div>
+                        </td>
+                        <td style="color:var(--cream-dim);">${date}</td>
+                        <td style="text-align:right; display:flex; gap:0.4rem; justify-content:flex-end;">
+                            <button class="btn btn-secondary" style="padding:0.3rem 0.6rem; font-size:0.7rem;" onclick="retryVideoPipeline('${v.video_id}')" ${v.status !== 'error' ? 'disabled' : ''}>Retry</button>
+                            <button class="btn btn-danger" style="padding:0.3rem 0.6rem; font-size:0.7rem;" onclick="deleteVideoDocument('${v.video_id}')">Delete</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch(e) {
+                tbody.innerHTML = '<tr><td colspan="8" style="color:var(--red);">Error loading video pipeline records.</td></tr>';
+            }
+        }
+
+        async function retryVideoPipeline(videoId) {
+            showToast('Re-triggering pipeline for video: ' + videoId);
+            try {
+                const res = await fetch('/api/admin/videos/action', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        email: EMAIL,
+                        video_id: videoId,
+                        action: 'retry'
+                    })
+                });
+                if(res.ok) {
+                    showToast('Asynchronous pipeline restarted.');
+                    loadVideos();
+                }
+            } catch(e) {}
+        }
+
+        async function deleteVideoDocument(videoId) {
+            if(!confirm('Delete this video job document and all linked clips?')) return;
+            try {
+                const res = await fetch('/api/admin/videos/action', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        email: EMAIL,
+                        video_id: videoId,
+                        action: 'delete'
+                    })
+                });
+                if(res.ok) {
+                    showToast('Video job removed.');
+                    loadVideos();
+                }
+            } catch(e) {}
+        }
+
+        // 4. GENERATED HIGHLIGHTS
+        async function loadClips() {
+            const tbody = document.getElementById('clipsTableBody');
+            tbody.innerHTML = '<tr><td colspan="7" style="color:var(--cream-dim);">Loading generated highlights...</td></tr>';
+
+            try {
+                const res = await fetch(`/api/admin/clips?email=${encodeURIComponent(EMAIL)}`);
+                const data = await res.json();
+                
+                tbody.innerHTML = '';
+                if(!data.clips || !data.clips.length) {
+                    tbody.innerHTML = '<tr><td colspan="7" style="color:var(--cream-dim);">No generated highlights.</td></tr>';
+                    return;
+                }
+
+                data.clips.forEach(c => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td style="font-family: monospace;">${c.clip_id}</td>
+                        <td style="font-family: monospace; color:var(--cream-dim);">${c.video_id}</td>
+                        <td><span class="badge badge-blue">${c.mood}</span></td>
+                        <td style="font-weight: 500;">${Math.round(c.score * 100)}%</td>
+                        <td style="color:var(--cream-dim);">${c.duration}s</td>
+                        <td style="font-weight: 500; max-width: 200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${c.ai_content?.title || 'ClipHighlight'}</td>
+                        <td style="text-align:right; display:flex; gap:0.4rem; justify-content:flex-end;">
+                            <button class="btn btn-primary" style="padding:0.3rem 0.6rem; font-size:0.7rem;" onclick="openClipDetailModal('${c.clip_id}')">Edit AI</button>
+                            <a class="btn btn-secondary" style="padding:0.3rem 0.6rem; font-size:0.7rem; text-decoration:none;" href="/download/${encodeURIComponent(c.filename)}" download>Download</a>
+                            <button class="btn btn-danger" style="padding:0.3rem 0.6rem; font-size:0.7rem;" onclick="deleteHighlightClip('${c.clip_id}')">Delete</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch(e) {
+                tbody.innerHTML = '<tr><td colspan="7" style="color:var(--red);">Error loading highlights database.</td></tr>';
+            }
+        }
+
+        async function deleteHighlightClip(clipId) {
+            if(!confirm('Are you sure you want to delete clip: ' + clipId + '?')) return;
+            try {
+                const res = await fetch('/api/admin/clips/action', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        email: EMAIL,
+                        clip_id: clipId,
+                        action: 'delete'
+                    })
+                });
+                if(res.ok) {
+                    showToast('Clip deleted successfully.');
+                    loadClips();
+                }
+            } catch(e) {}
+        }
+
+        // Modals Clips Detail
+        let activeEditClipId = null;
+        async function openClipDetailModal(clipId) {
+            activeEditClipId = clipId;
+            document.getElementById('modalClipHeader').innerText = 'Clip Detail: ' + clipId;
+            document.getElementById('modalClipTitle').value = 'Loading...';
+            document.getElementById('modalClipDesc').value = 'Loading...';
+            document.getElementById('modalClipTags').value = '';
+            document.getElementById('clipDetailModal').style.display = 'flex';
+
+            try {
+                const res = await fetch(`/api/admin/clips?email=${encodeURIComponent(EMAIL)}&clip_id=${clipId}`);
+                const data = await res.json();
+                const clip = data.clip || {};
+                
+                document.getElementById('modalClipTitle').value = clip.ai_content?.title || '';
+                document.getElementById('modalClipDesc').value = clip.ai_content?.description || '';
+                document.getElementById('modalClipTags').value = (clip.ai_content?.hashtags || []).join(', ');
+            } catch(_) {
+                showToast('Failed to fetch clip details.');
+            }
+        }
+        function closeClipDetailModal() {
+            document.getElementById('clipDetailModal').style.display = 'none';
+        }
+        async function submitClipMetadataSave() {
+            const title = document.getElementById('modalClipTitle').value;
+            const desc = document.getElementById('modalClipDesc').value;
+            const tags = document.getElementById('modalClipTags').value.split(',').map(t=>t.trim()).filter(Boolean);
+
+            try {
+                const res = await fetch('/api/admin/clips/action', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        email: EMAIL,
+                        clip_id: activeEditClipId,
+                        action: 'edit_metadata',
+                        title: title,
+                        description: desc,
+                        hashtags: tags
+                    })
+                });
+                if(res.ok) {
+                    showToast('Clip metadata saved.');
+                    closeClipDetailModal();
+                    loadClips();
+                }
+            } catch(_) {}
+        }
+        async function regenerateClipAI() {
+            const btn = document.getElementById('btnRegenAI');
+            btn.disabled = true;
+            btn.textContent = 'Generating...';
+            showToast('Querying Gemini model to write fresh captions...');
+            
+            try {
+                const res = await fetch('/api/admin/clips/action', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        email: EMAIL,
+                        clip_id: activeEditClipId,
+                        action: 'regenerate_ai'
+                    })
+                });
+                const data = await res.json();
+                if(res.ok) {
+                    showToast('AI copywriting completed successfully.');
+                    document.getElementById('modalClipTitle').value = data.ai_content?.title || '';
+                    document.getElementById('modalClipDesc').value = data.ai_content?.description || '';
+                    document.getElementById('modalClipTags').value = (data.ai_content?.hashtags || []).join(', ');
+                } else {
+                    showToast(data.error || 'Gemini regeneration failed.');
+                }
+            } catch(_) {
+                showToast('Network error during AI execution.');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '✨ Regenerate AI';
+            }
+        }
+
+        // 5. PUBLISHING QUEUE
+        async function loadQueue() {
+            const tbody = document.getElementById('queueTableBody');
+            tbody.innerHTML = '<tr><td colspan="6" style="color:var(--cream-dim);">Loading publishing queue drafts...</td></tr>';
+
+            try {
+                const res = await fetch(`/api/admin/queue?email=${encodeURIComponent(EMAIL)}`);
+                const data = await res.json();
+                
+                tbody.innerHTML = '';
+                if(!data.queue || !data.queue.length) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="color:var(--cream-dim);">Publishing queue is empty.</td></tr>';
+                    return;
+                }
+
+                data.queue.forEach(q => {
+                    const tr = document.createElement('tr');
+                    const date = q.schedule_time ? new Date(q.schedule_time).toLocaleString() : 'N/A';
+                    
+                    let statusBadge = '';
+                    if(q.status === 'published') statusBadge = '<span class="badge badge-green">Published</span>';
+                    else if (q.status === 'error') statusBadge = `<span class="badge badge-red" title="${q.error || ''}">Error</span>`;
+                    else if (q.status === 'publishing') statusBadge = '<span class="badge badge-blue">Publishing</span>';
+                    else statusBadge = '<span class="badge badge-yellow">Queued</span>';
+
+                    tr.innerHTML = `
+                        <td style="font-family: monospace;">${q.queue_id}</td>
+                        <td><span class="badge badge-blue">${q.platform.toUpperCase()}</span></td>
+                        <td>${date}</td>
+                        <td>${statusBadge}</td>
+                        <td style="font-weight: 500; max-width: 200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${q.title || 'Draft Clip'}</td>
+                        <td style="text-align:right; display:flex; gap:0.4rem; justify-content:flex-end;">
+                            <button class="btn btn-primary" style="padding:0.3rem 0.6rem; font-size:0.7rem;" onclick="publishQueueItemNow('${q.queue_id}')" ${q.status === 'published' ? 'disabled' : ''}>Publish Now</button>
+                            <button class="btn btn-secondary" style="padding:0.3rem 0.6rem; font-size:0.7rem;" onclick="retryQueueItem('${q.queue_id}')" ${q.status !== 'error' ? 'disabled' : ''}>Retry</button>
+                            <button class="btn btn-danger" style="padding:0.3rem 0.6rem; font-size:0.7rem;" onclick="deleteQueueItem('${q.queue_id}')">Delete</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch(e) {
+                tbody.innerHTML = '<tr><td colspan="6" style="color:var(--red);">Error loading scheduling queue records.</td></tr>';
+            }
+        }
+
+        async function publishQueueItemNow(queueId) {
+            showToast('Initiating immediate post publish: ' + queueId);
+            try {
+                const res = await fetch('/api/admin/queue/action', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        email: EMAIL,
+                        queue_id: queueId,
+                        action: 'publish_now'
+                    })
+                });
+                const rData = await res.json();
+                if(res.ok) {
+                    showToast('Publishing triggered successfully.');
+                    loadQueue();
+                } else {
+                    showToast(rData.error || 'Publish failed.');
+                }
+            } catch(e) {}
+        }
+
+        async function retryQueueItem(queueId) {
+            try {
+                const res = await fetch('/api/admin/queue/action', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        email: EMAIL,
+                        queue_id: queueId,
+                        action: 'retry'
+                    })
+                });
+                if(res.ok) {
+                    showToast('Queue item status reset to queued.');
+                    loadQueue();
+                }
+            } catch(e) {}
+        }
+
+        async function deleteQueueItem(queueId) {
+            if(!confirm('Cancel and delete schedule draft?')) return;
+            try {
+                const res = await fetch('/api/admin/queue/action', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        email: EMAIL,
+                        queue_id: queueId,
+                        action: 'delete'
+                    })
+                });
+                if(res.ok) {
+                    showToast('Schedule draft removed.');
+                    loadQueue();
+                }
+            } catch(e) {}
+        }
+
+        // 6. SYSTEM HEALTH
+        async function loadSystemHealth() {
+            try {
+                const res = await fetch(`/api/admin/system?email=${encodeURIComponent(EMAIL)}`);
+                const data = await res.json();
+                
+                // Indicators color updater helper
+                const setIndicator = (elId, status, detailElId, detailText) => {
+                    const el = document.getElementById(elId);
+                    const det = document.getElementById(detailElId);
+                    det.textContent = detailText;
+                    if(status === 'healthy') {
+                        el.style.color = 'var(--green)';
+                    } else if (status === 'warning') {
+                        el.style.color = 'var(--yellow)';
+                    } else {
+                        el.style.color = 'var(--red)';
+                    }
+                };
+
+                // DB
+                setIndicator('health-db', data.db_status, 'db-health-detail', data.db_detail || 'Connected to MongoDB Atlas');
+                
+                // Gemini
+                setIndicator('health-gemini', data.gemini_status, 'gemini-health-detail', data.gemini_detail || 'Models list check passed');
+                
+                // Whisper
+                setIndicator('health-whisper', data.whisper_status, 'whisper-health-detail', data.whisper_detail || 'API token verified');
+                
+                // FFmpeg
+                setIndicator('health-ffmpeg', data.ffmpeg_status, 'ffmpeg-health-detail', data.ffmpeg_detail || 'Binary active at root path');
+                
+                // Poller
+                setIndicator('health-poller', data.poller_status, 'poller-health-detail', data.poller_detail || 'Background thread active');
+
+                // Hardware loads
+                document.getElementById('resCpuText').textContent = (data.cpu || 0) + '%';
+                document.getElementById('resCpuBar').style.width = (data.cpu || 0) + '%';
+                
+                document.getElementById('resRamText').textContent = (data.ram || 0) + '%';
+                document.getElementById('resRamBar').style.width = (data.ram || 0) + '%';
+                
+                document.getElementById('resDiskText').textContent = (data.disk_percent || 0) + '% Used (' + (data.disk_free_gb || 0) + ' GB free)';
+                document.getElementById('resDiskBar').style.width = (data.disk_percent || 0) + '%';
+
+            } catch(e) {
+                showToast('Failed to retrieve health status.');
+            }
+        }
+
+        // 7. API & QUOTA MONITOR
+        async function loadApiUsage() {
+            try {
+                const res = await fetch(`/api/admin/api-usage?email=${encodeURIComponent(EMAIL)}`);
+                const data = await res.json();
+                
+                document.getElementById('api-gemini-status').textContent = data.gemini_status || 'Active';
+                document.getElementById('api-gemini-speed').textContent = 'Latency: ' + (data.gemini_latency || 0) + 'ms';
+                
+                document.getElementById('api-whisper-status').textContent = data.whisper_status || 'Active';
+                document.getElementById('whisper-audio-minutes').textContent = (data.whisper_minutes || 0).toFixed(1) + ' audio mins processed';
+                
+                document.getElementById('stat-daily-req').textContent = data.requests_today || 0;
+                document.getElementById('stat-monthly-req').textContent = data.requests_month || 0;
+
+                // Balance remaining
+                document.getElementById('gemini-credits').textContent = data.gemini_credits || '$0.00';
+                document.getElementById('gemini-burn-rate').textContent = 'Estimated remaining days: ' + (data.projected_days || 'N/A') + ' days';
+                
+                document.getElementById('whisper-credits').textContent = data.whisper_credits || '$0.00';
+                
+                document.getElementById('storage-space-val').textContent = (data.storage_gb || 0).toFixed(2) + ' GB';
+                document.getElementById('storage-details').textContent = 'Occupied by ' + (data.total_files || 0) + ' media files';
+            } catch(e) {
+                showToast('Failed to fetch API usage details.');
+            }
+        }
+
+        // 8. ADVANCED ANALYTICS (CHART.JS)
+        async function loadAnalyticsCharts() {
+            try {
+                const res = await fetch(`/api/admin/analytics?email=${encodeURIComponent(EMAIL)}`);
+                const data = await res.json();
+
+                // Destruct old charts
+                Object.values(charts).forEach(c => c.destroy());
+                charts = {};
+
+                // Chart 1: User Growth
+                const ctxUsers = document.getElementById('userGrowthChart').getContext('2d');
+                charts.users = new Chart(ctxUsers, {
+                    type: 'line',
+                    data: {
+                        labels: data.user_growth?.labels || [],
+                        datasets: [{
+                            label: 'Total Users',
+                            data: data.user_growth?.data || [],
+                            borderColor: '#8B5CF6',
+                            backgroundColor: 'rgba(139, 92, 246, 0.05)',
+                            fill: true,
+                            tension: 0.3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: { y: { grid: { color: 'rgba(255,255,255,0.03)' } } }
+                    }
+                });
+
+                // Chart 2: Video uploads
+                const ctxVideos = document.getElementById('videoUploadsChart').getContext('2d');
+                charts.videos = new Chart(ctxVideos, {
+                    type: 'bar',
+                    data: {
+                        labels: data.video_volumes?.labels || [],
+                        datasets: [{
+                            label: 'Videos Uploaded',
+                            data: data.video_volumes?.data || [],
+                            backgroundColor: '#D946EF',
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: { y: { grid: { color: 'rgba(255,255,255,0.03)' } } }
+                    }
+                });
+
+                // Chart 3: Mood category split
+                const ctxMoods = document.getElementById('moodCategoryChart').getContext('2d');
+                charts.moods = new Chart(ctxMoods, {
+                    type: 'doughnut',
+                    data: {
+                        labels: data.moods_split?.labels || [],
+                        datasets: [{
+                            data: data.moods_split?.data || [],
+                            backgroundColor: ['#8B5CF6', '#D946EF', '#3B82F6', '#10B981', '#F59E0B', '#EF4444'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'right', labels: { color: '#F8FAFC' } } }
+                    }
+                });
+
+                // Chart 4: API token consumption
+                const ctxTokens = document.getElementById('apiTokensChart').getContext('2d');
+                charts.tokens = new Chart(ctxTokens, {
+                    type: 'line',
+                    data: {
+                        labels: data.tokens_consumption?.labels || [],
+                        datasets: [{
+                            label: 'API Spend ($)',
+                            data: data.tokens_consumption?.data || [],
+                            borderColor: '#3B82F6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.05)',
+                            fill: true,
+                            tension: 0.3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: { y: { grid: { color: 'rgba(255,255,255,0.03)' } } }
+                    }
+                });
+
+            } catch(e) {
+                showToast('Failed to build analytics charts.');
+            }
+        }
+
+        // 9. SYSTEM LOGS CONSOLE
+        let rawLogLines = [];
+        async function loadLogs() {
+            const terminal = document.getElementById('logsTerminal');
+            terminal.textContent = 'Connecting log streaming socket...';
+
+            try {
+                const res = await fetch(`/api/admin/logs?email=${encodeURIComponent(EMAIL)}`);
+                const data = await res.json();
+                
+                rawLogLines = data.logs || [];
+                filterLogs();
+            } catch(e) {
+                terminal.textContent = 'Failed to load system logs file.';
+            }
+        }
+
+        function filterLogs() {
+            const terminal = document.getElementById('logsTerminal');
+            const search = document.getElementById('logSearch').value.toLowerCase();
+            const filter = document.getElementById('logSeverity').value;
+
+            let filtered = rawLogLines;
+            if(filter) {
+                filtered = filtered.filter(l => l.includes(filter));
+            }
+            if(search) {
+                filtered = filtered.filter(l => l.toLowerCase().includes(search));
+            }
+
+            if(!filtered.length) {
+                terminal.textContent = 'No matching console logs found.';
+                return;
+            }
+
+            terminal.textContent = filtered.join('\n');
+            // Auto scroll to bottom
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        // 10. PROVIDER SETTINGS
+        async function loadSettings() {
+            try {
+                const res = await fetch(`/api/admin/settings?email=${encodeURIComponent(EMAIL)}`);
+                const data = await res.json();
+                
+                document.getElementById('setHighlightProvider').value = data.provider || 'gemini';
+                document.getElementById('setDisableFallbacks').value = data.disable_fallbacks ? 'true' : 'false';
+                document.getElementById('setFacebookSandbox').value = data.facebook_mode || 'mock';
+
+                // Clear input placeholders
+                document.getElementById('setGeminiKey').value = '';
+                document.getElementById('setOpenAIKey').value = '';
+                document.getElementById('setAdminSecret').value = '';
+
+                if (data.gemini_key_configured) {
+                    document.getElementById('setGeminiKey').placeholder = '•••••••••••••••• Key Configured';
+                }
+                if (data.openai_key_configured) {
+                    document.getElementById('setOpenAIKey').placeholder = '•••••••••••••••• Key Configured';
+                }
+                if (data.admin_secret_configured) {
+                    document.getElementById('setAdminSecret').placeholder = '•••••••••••••••• Secret Configured';
+                }
+
+            } catch(e) {
+                showToast('Failed to fetch provider settings.');
+            }
+        }
+
+        async function submitKeysUpdate() {
+            const gemini = document.getElementById('setGeminiKey').value.trim();
+            const openai = document.getElementById('setOpenAIKey').value.trim();
+            const secret = document.getElementById('setAdminSecret').value.trim();
+
+            if(!gemini && !openai && !secret) {
+                showToast('No credentials entered to update.');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/admin/settings/apis', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        email: EMAIL,
+                        gemini_api_key: gemini || null,
+                        openai_api_key: openai || null,
+                        admin_secret: secret || null
+                    })
+                });
+                if(res.ok) {
+                    showToast('Credentials rotated successfully.');
+                    loadSettings();
+                } else {
+                    const data = await res.json();
+                    showToast(data.error || 'Failed to update keys.');
+                }
+            } catch(_) {}
+        }
+
+        async function submitProviderUpdate() {
+            const provider = document.getElementById('setHighlightProvider').value;
+            const disableFallbacks = document.getElementById('setDisableFallbacks').value === 'true';
+            const facebookMode = document.getElementById('setFacebookSandbox').value;
+
+            try {
+                const res = await fetch('/api/admin/settings/apis', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        email: EMAIL,
+                        action: 'update_provider_settings',
+                        provider: provider,
+                        disable_fallbacks: disableFallbacks,
+                        facebook_mode: facebookMode
+                    })
+                });
+                if(res.ok) {
+                    showToast('Model and engine configs updated successfully.');
+                    loadSettings();
+                } else {
+                    showToast('Failed to update config.');
+                }
+            } catch(_) {}
+        }
+    </script>
+</body>
+</html>
