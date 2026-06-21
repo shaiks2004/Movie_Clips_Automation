@@ -1,0 +1,34 @@
+{% extends "app_base.html" %}
+{% block title %}Dashboard — ClipMood Studio{% endblock %}
+{% block n_dash %}active{% endblock %}
+{% block content %}
+<h1 class="page-title">Welcome back, Alex 👋</h1>
+<p class="page-sub">Here's what's happening in your content factory.</p>
+<div class="metric-grid">
+    <div class="metric tilt"><div class="tilt-glow"></div><div class="label">🎞️ Videos Processed</div><div class="val">128</div><div class="delta up">▲ 12% this week</div></div>
+    <div class="metric tilt"><div class="tilt-glow"></div><div class="label">🎬 Clips Generated</div><div class="val">1,042</div><div class="delta up">▲ 8% this week</div></div>
+    <div class="metric tilt"><div class="tilt-glow"></div><div class="label">💾 Storage Used</div><div class="val">34.2 GB</div><div class="delta">of 100 GB</div></div>
+    <div class="metric tilt"><div class="tilt-glow"></div><div class="label">⚡ AI Credits</div><div class="val">8,500</div><div class="delta down">▼ 1,500 left</div></div>
+</div>
+<div class="grid" style="grid-template-columns:1.4fr 1fr;">
+    <div class="panel reveal">
+        <div class="panel-head"><h3>Recent Activity</h3><a href="/app/clips" class="nav-link">View all</a></div>
+        <div class="activity">
+            <div class="activity-item"><div class="dot">🎬</div><div style="flex:1;"><div>Generated 6 clips from <b>Podcast Ep. 42</b></div><small>2 minutes ago</small></div><span class="status done">Done</span></div>
+            <div class="activity-item"><div class="dot">⬆</div><div style="flex:1;"><div>Uploaded <b>Keynote_Final.mp4</b></div><small>1 hour ago</small></div><span class="status processing">Processing</span></div>
+            <div class="activity-item"><div class="dot">📅</div><div style="flex:1;"><div>Scheduled <b>"3 Habits of Top Creators"</b> to TikTok</div><small>3 hours ago</small></div><span class="status scheduled">Scheduled</span></div>
+            <div class="activity-item"><div class="dot">✍️</div><div style="flex:1;"><div>AI captions generated for <b>12 clips</b></div><small>Yesterday</small></div><span class="status done">Done</span></div>
+            <div class="activity-item"><div class="dot">🚀</div><div style="flex:1;"><div>Published <b>"Why You're Stuck"</b> to Reels</div><small>Yesterday</small></div><span class="status published">Published</span></div>
+        </div>
+    </div>
+    <div class="panel reveal">
+        <div class="panel-head"><h3>Upcoming Queue</h3><a href="/app/queue" class="nav-link">Manage</a></div>
+        <div class="activity">
+            <div class="activity-item"><div class="dot">▶</div><div style="flex:1;"><div>YouTube Shorts</div><small>Today, 6:00 PM</small></div><span class="status scheduled">Scheduled</span></div>
+            <div class="activity-item"><div class="dot">◎</div><div style="flex:1;"><div>Instagram Reels</div><small>Tomorrow, 9:00 AM</small></div><span class="status scheduled">Scheduled</span></div>
+            <div class="activity-item"><div class="dot">♪</div><div style="flex:1;"><div>TikTok</div><small>Fri, 12:00 PM</small></div><span class="status queued">Queued</span></div>
+        </div>
+        <a href="/app/upload" class="btn btn-primary full-btn mt-3">⬆ New Upload</a>
+    </div>
+</div>
+{% endblock %}

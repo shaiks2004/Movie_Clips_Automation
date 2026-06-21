@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Reset password — ClipMood{% endblock %}
+{% block body %}
+<div class="auth-wrap"><div class="auth-card reveal">
+    <h1>Reset password</h1><p class="sub">Enter your email and we'll send a reset link.</p>
+    <form onsubmit="event.preventDefault(); toast('Reset link sent (demo).');">
+        <div class="field"><label>Email</label><input class="form-input" type="email" placeholder="you@email.com" required></div>
+        <button class="btn btn-primary full-btn" type="submit">Send Reset Link</button>
+    </form>
+    <p class="auth-foot">Remembered it? <a href="/login">Back to login</a></p>
+</div></div>
+{% endblock %}

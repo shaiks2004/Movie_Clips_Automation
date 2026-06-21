@@ -1,0 +1,42 @@
+{% extends "app_base.html" %}
+{% block title %}Analytics — ClipMood{% endblock %}
+{% block n_analytics %}active{% endblock %}
+{% block content %}
+<h1 class="page-title">Performance Analytics</h1>
+<p class="page-sub">Track output, engagement, and engine performance.</p>
+<div class="metric-grid">
+    <div class="metric tilt"><div class="tilt-glow"></div><div class="label">Videos Uploaded</div><div class="val">128</div><div class="delta up">▲ 12%</div></div>
+    <div class="metric tilt"><div class="tilt-glow"></div><div class="label">Clips Generated</div><div class="val">1,042</div><div class="delta up">▲ 8%</div></div>
+    <div class="metric tilt"><div class="tilt-glow"></div><div class="label">Avg Processing</div><div class="val">3.8m</div><div class="delta up">▼ faster 0.4m</div></div>
+    <div class="metric tilt"><div class="tilt-glow"></div><div class="label">Storage Used</div><div class="val">34 GB</div><div class="delta">of 100 GB</div></div>
+</div>
+<div class="grid" style="grid-template-columns:1.5fr 1fr;">
+    <div class="panel reveal"><div class="panel-head"><h3>Clips Generated (last 7 days)</h3></div>
+        <div class="bars">
+            <div class="bar" data-h="45"><span>Mon</span></div><div class="bar" data-h="68"><span>Tue</span></div><div class="bar" data-h="52"><span>Wed</span></div>
+            <div class="bar" data-h="88"><span>Thu</span></div><div class="bar" data-h="74"><span>Fri</span></div><div class="bar" data-h="96"><span>Sat</span></div><div class="bar" data-h="60"><span>Sun</span></div>
+        </div>
+    </div>
+    <div class="panel reveal"><div class="panel-head"><h3>Top Moods</h3></div>
+        <div class="flex center gap" style="justify-content:center;">
+            <div class="donut" style="background:conic-gradient(var(--accent) 0 30%,var(--blue) 30% 52%,var(--red) 52% 70%,var(--yellow) 70% 84%,var(--green) 84% 94%,var(--pink) 94% 100%);"><div class="hole"><div><div style="font-family:'Oswald';font-size:1.4rem;">1,042</div><small class="muted">clips</small></div></div></div>
+            <div class="legend">
+                <div class="row"><span class="sw" style="background:var(--accent)"></span> Trending 30%</div>
+                <div class="row"><span class="sw" style="background:var(--blue)"></span> Educational 22%</div>
+                <div class="row"><span class="sw" style="background:var(--red)"></span> Motivational 18%</div>
+                <div class="row"><span class="sw" style="background:var(--yellow)"></span> Funny 14%</div>
+                <div class="row"><span class="sw" style="background:var(--green)"></span> Suspense 10%</div>
+                <div class="row"><span class="sw" style="background:var(--pink)"></span> Emotional 6%</div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel reveal mt-3"><div class="panel-head"><h3>Top Performing Content</h3></div>
+    <div style="overflow-x:auto;"><table class="data-table"><thead><tr><th>Clip</th><th>Platform</th><th>Views</th><th>Engagement</th><th>Mood</th></tr></thead><tbody>
+        <tr><td>3 Habits of Top 1% Creators</td><td>TikTok</td><td>248K</td><td><span class="delta up">9.2%</span></td><td><span class="mood-badge mood-motivational">motivational</span></td></tr>
+        <tr><td>The Trend Everyone's Copying</td><td>Reels</td><td>192K</td><td><span class="delta up">8.7%</span></td><td><span class="mood-badge mood-trending">trending</span></td></tr>
+        <tr><td>Why You're Always Tired</td><td>Shorts</td><td>134K</td><td><span class="delta up">7.4%</span></td><td><span class="mood-badge mood-educational">educational</span></td></tr>
+        <tr><td>The Moment Everything Changed</td><td>LinkedIn</td><td>88K</td><td><span class="delta up">6.9%</span></td><td><span class="mood-badge mood-emotional">emotional</span></td></tr>
+    </tbody></table></div>
+</div>
+{% endblock %}

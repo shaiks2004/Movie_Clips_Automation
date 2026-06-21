@@ -1,0 +1,35 @@
+{% extends "app_base.html" %}
+{% block title %}Settings — ClipMood{% endblock %}
+{% block n_settings %}active{% endblock %}
+{% block content %}
+<h1 class="page-title">Settings</h1>
+<p class="page-sub">Manage your profile, security, and integrations.</p>
+<div class="grid" style="grid-template-columns:1fr 1fr;">
+    <div class="panel reveal"><div class="panel-head"><h3>Profile</h3></div>
+        <div class="field"><label>Full name</label><input class="form-input" value="Alex Morgan"></div>
+        <div class="field"><label>Email</label><input class="form-input" value="{{ your_email }}"></div>
+        <div class="field"><label>Company</label><input class="form-input" value="Creator Studio Co."></div>
+        <button class="btn btn-primary" onclick="toast('Profile saved')">Save Changes</button>
+    </div>
+    <div class="panel reveal"><div class="panel-head"><h3>Password</h3></div>
+        <div class="field"><label>Current password</label><input class="form-input" type="password" placeholder="••••••••"></div>
+        <div class="field"><label>New password</label><input class="form-input" type="password" placeholder="••••••••"></div>
+        <div class="field"><label>Confirm new password</label><input class="form-input" type="password" placeholder="••••••••"></div>
+        <button class="btn btn-primary" onclick="toast('Password updated')">Update Password</button>
+    </div>
+    <div class="panel reveal"><div class="panel-head"><h3>API Keys</h3></div>
+        <div class="field"><label>Gemini API Key</label><input class="form-input" type="password" value="••••••••••••••••" readonly></div>
+        <div class="field"><label>OpenAI API Key</label><input class="form-input" type="password" value="••••••••••••••••" readonly></div>
+        <button class="btn btn-secondary" onclick="toast('Key regenerated')">Regenerate</button>
+    </div>
+    <div class="panel reveal"><div class="panel-head"><h3>Notifications</h3></div>
+        <div class="flex between center" style="padding:.6rem 0;border-bottom:1px solid var(--rule);"><span>Email when processing completes</span><input type="checkbox" checked></div>
+        <div class="flex between center" style="padding:.6rem 0;border-bottom:1px solid var(--rule);"><span>Weekly analytics digest</span><input type="checkbox" checked></div>
+        <div class="flex between center" style="padding:.6rem 0;"><span>Product updates</span><input type="checkbox"></div>
+    </div>
+    <div class="panel reveal"><div class="panel-head"><h3>Subscription &amp; Billing</h3></div>
+        <p class="muted">You're on the <span class="badge badge-premium">Premium Factory</span> plan — ₹299/month, renews Jul 18.</p>
+        <div class="flex gap mt-3"><a href="/pricing" class="btn btn-secondary">Change Plan</a><button class="btn btn-secondary" onclick="toast('Invoice downloaded')">Download Invoice</button></div>
+    </div>
+</div>
+{% endblock %}

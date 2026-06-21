@@ -1,0 +1,44 @@
+{% extends "app_base.html" %}
+{% block title %}Generated Clips — ClipMood{% endblock %}
+{% block n_clips %}active{% endblock %}
+{% block content %}
+<h1 class="page-title">Generated Clips</h1>
+<p class="page-sub">Preview, download, and publish your latest AI-generated highlights.</p>
+<div class="clip-grid" id="grid"></div>
+<div class="modal-overlay" id="playerModal"><div class="modal-box" style="max-width:520px;">
+    <div class="player-frame" style="aspect-ratio:9/16;max-height:60vh;margin:0 auto;background:#000;border-radius:10px;display:flex;align-items:center;justify-content:center;"><div style="text-align:center;color:var(--cream-dim);"><span style="font-size:2.5rem;display:block;">🎬</span><p id="pmTitle">Clip preview</p></div></div>
+    <div class="mt-2"><div id="pmDesc" class="muted" style="font-size:.85rem;line-height:1.6;"></div></div>
+    <div class="flex gap mt-3"><button class="btn btn-secondary full-btn" onclick="closeModal('playerModal')">Close</button><button class="btn btn-primary full-btn" onclick="toast('Added to publishing queue')">Add to Queue</button></div>
+</div></div>
+{% endblock %}
+{% block scripts %}
+<script>
+var CLIPS=[
+ {t:"3 Habits of Top 1% Creators",mood:"motivational",dur:"0:42",score:"9.4",d:"The mindset shifts that separate top creators from everyone else.",tags:["#creator","#growth","#mindset"]},
+ {t:"Why You're Always Tired",mood:"educational",dur:"0:58",score:"9.1",d:"A simple science-backed reason your energy crashes by 3pm.",tags:["#health","#productivity"]},
+ {t:"This Made The Whole Room Laugh",mood:"funny",dur:"0:31",score:"8.8",d:"An unexpected punchline that landed perfectly.",tags:["#funny","#viral"]},
+ {t:"The Moment Everything Changed",mood:"emotional",dur:"0:49",score:"9.2",d:"A vulnerable story about hitting rock bottom and bouncing back.",tags:["#story","#inspiration"]},
+ {t:"You Won't Believe What Happens",mood:"suspense",dur:"0:37",score:"8.6",d:"A cliffhanger setup that keeps viewers watching to the end.",tags:["#suspense","#hook"]},
+ {t:"The Trend Everyone's Copying",mood:"trending",dur:"0:45",score:"9.0",d:"Breaking down the format blowing up across every platform.",tags:["#trending","#tiktok"]},
+ {t:"One Tip That 10x'd My Reach",mood:"educational",dur:"0:53",score:"8.9",d:"The posting strategy that doubled impressions overnight.",tags:["#strategy","#reach"]},
+ {t:"Stop Doing This On Camera",mood:"motivational",dur:"0:40",score:"8.7",d:"The on-camera habit quietly killing your retention.",tags:["#video","#tips"]}
+];
+var g=document.getElementById('grid');
+CLIPS.forEach(function(c){
+  var el=document.createElement('div'); el.className='vcard tilt';
+  el.innerHTML='<div class="tilt-glow"></div>'+
+    '<div class="vthumb"><span class="score">★ '+c.score+'</span><div class="play">▶</div><span class="dur">'+c.dur+'</span></div>'+
+    '<div class="vbody"><h4>'+c.t+'</h4><div class="meta"><span class="mood-badge mood-'+c.mood+'">'+c.mood+'</span></div>'+
+    '<div class="tag-row">'+c.tags.map(function(t){return '<span class="tag">'+t+'</span>';}).join('')+'</div>'+
+    '<div class="vactions">'+
+      '<button class="icon-btn" onclick="play(this.getAttribute(\'data-t\'),this.getAttribute(\'data-d\'))" data-t="'+c.t.replace(/"/g,'')+'" data-d="'+c.d.replace(/"/g,'')+'">▶ Play</button>'+
+      '<button class="icon-btn" onclick="toast(\'Downloading...\')">⬇</button>'+
+      '<button class="icon-btn" onclick="cap(this.getAttribute(\'data-t\'))" data-t="'+c.t.replace(/"/g,'')+'">⧉</button>'+
+      '<button class="icon-btn" onclick="toast(\'Added to queue\')">📅</button>'+
+    '</div></div>';
+  g.appendChild(el);
+});
+function play(t,d){ document.getElementById('pmTitle').textContent=t; document.getElementById('pmDesc').textContent=d; openModal('playerModal'); }
+function cap(t){ if(navigator.clipboard) navigator.clipboard.writeText(t); toast('Caption copied'); }
+</script>
+{% endblock %}

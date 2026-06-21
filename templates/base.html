@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>{% block title %}ClipMood — AI Content Factory{% endblock %}</title>
+    <meta name="description" content="{% block description %}Turn one long-form video into endless viral-ready short clips with AI.{% endblock %}"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/styles.css">
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <div class="ambient-glow glow-top-right"></div>
+    <div class="ambient-glow glow-bottom-left"></div>
+    <nav class="nav" id="nav">
+        <a href="/" class="logo">CLIP<span>MOOD</span></a>
+        <div class="nav-links">
+            <a href="/#features" class="nav-link">Features</a>
+            <a href="/#how" class="nav-link">How it works</a>
+            <a href="/pricing" class="nav-link {% block nav_pricing %}{% endblock %}">Pricing</a>
+            <a href="/login" class="nav-link {% block nav_login %}{% endblock %}">Login</a>
+            <a href="/register" class="btn btn-primary">Start Free</a>
+        </div>
+        <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+    </nav>
+    <div class="mobile-nav" id="mobileNav">
+        <a href="/#features">Features</a><a href="/#how">How it works</a><a href="/pricing">Pricing</a><a href="/login">Login</a><a href="/register" class="btn btn-primary">Start Free</a>
+    </div>
+    {% block body %}{% endblock %}
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="/" class="logo" style="font-family:'Oswald',sans-serif;font-weight:700;font-size:1.5rem;text-decoration:none;color:#fff;">CLIP<span style="color:var(--primary)">MOOD</span></a>
+                    <p>The AI content factory that turns one long-form video into endless social-media-ready clips — transcribed, sliced, subtitled, and captioned automatically.</p>
+                    <div class="social-links"><a href="#" title="X">𝕏</a><a href="#" title="Instagram">◎</a><a href="#" title="YouTube">▶</a><a href="#" title="LinkedIn">in</a></div>
+                </div>
+                <div><h4>PRODUCT</h4><a href="/#features">Features</a><a href="/pricing">Pricing</a><a href="/app">Dashboard</a><a href="/register">Start Free</a></div>
+                <div><h4>COMPANY</h4><a href="#">About</a><a href="#">Blog</a><a href="#">Careers</a><a href="#">Contact</a></div>
+                <div><h4>RESOURCES</h4><a href="#">Documentation</a><a href="#">API</a><a href="#">Changelog</a><a href="#">Status</a></div>
+                <div><h4>LEGAL</h4><a href="#">Privacy Policy</a><a href="#">Terms</a><a href="#">Security</a><a href="mailto:{{ your_email }}">Support</a></div>
+            </div>
+            <div class="footer-bottom"><span>ClipMood AI Content Factory &copy; 2026. All rights reserved.</span><span>Made for creators, agencies &amp; marketers.</span></div>
+        </div>
+    </footer>
+    <script src="/static/js/film-grain.js"></script>
+    <script src="/static/js/site.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

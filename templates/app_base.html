@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>{% block title %}ClipMood Studio{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/styles.css">
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <div class="ambient-glow glow-top-right"></div>
+    <div class="ambient-glow glow-bottom-left"></div>
+    <div class="app-shell">
+        <aside class="app-sidebar" id="appSidebar">
+            <div class="brand"><a href="/app">CLIP<span>MOOD</span></a></div>
+            <nav class="app-nav">
+                <a href="/app" class="{% block n_dash %}{% endblock %}"><span class="ic">▦</span> Dashboard</a>
+                <a href="/app/upload" class="{% block n_upload %}{% endblock %}"><span class="ic">⬆</span> Upload Studio</a>
+                <a href="/app/clips" class="{% block n_clips %}{% endblock %}"><span class="ic">🎬</span> Generated Clips</a>
+                <a href="/app/library" class="{% block n_library %}{% endblock %}"><span class="ic">📂</span> Content Library</a>
+                <a href="/app/queue" class="{% block n_queue %}{% endblock %}"><span class="ic">📅</span> Publishing Queue</a>
+                <a href="/app/analytics" class="{% block n_analytics %}{% endblock %}"><span class="ic">📊</span> Analytics</a>
+                <div class="group-label">Account</div>
+                <a href="/app/settings" class="{% block n_settings %}{% endblock %}"><span class="ic">⚙</span> Settings</a>
+                <a href="/app/profile" class="{% block n_profile %}{% endblock %}"><span class="ic">👤</span> Profile</a>
+                <a href="/pricing"><span class="ic">💳</span> Billing</a>
+            </nav>
+            <div class="side-foot"><span class="badge badge-premium" style="width:100%;text-align:center;display:block;">Premium Factory</span></div>
+        </aside>
+        <div class="app-main">
+            <header class="app-topbar">
+                <button class="btn btn-secondary app-menu-btn" id="appMenuBtn" aria-label="Menu">☰</button>
+                <input class="input search" placeholder="Search clips, videos, captions..." />
+                <div class="flex center gap"><a href="/" class="nav-link" title="Back to site">↗ Site</a><div class="avatar">A</div></div>
+            </header>
+            <main class="app-content">{% block content %}{% endblock %}</main>
+        </div>
+    </div>
+    <div class="toast" id="toast"></div>
+    <script src="/static/js/film-grain.js"></script>
+    <script src="/static/js/site.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

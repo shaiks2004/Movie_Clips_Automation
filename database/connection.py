@@ -1,43 +1,66 @@
 import os
 from dotenv import load_dotenv
-from pymongo import MongoClient
 
-# Load environment variables from .env
 load_dotenv()
 
 MONGODB_URI = os.getenv("MONGODB_URI")
-if not MONGODB_URI:
-    raise ValueError("Database Connection Error: MONGODB_URI not set in environment variables.")
 
-# Create the global MongoDB Client
-# Using a connection pool configured automatically by pymongo
-client = MongoClient(MONGODB_URI, serverSelectionTimeoutMS=5000)
+_db = None
+_client = None
+_using_memory = False
 
-def get_db():
-    """
-    Returns the database instance for ClipMood.
-    Extracts the database name from MONGODB_URI or defaults to 'clipmood'.
-    """
-    # Parse db name from Atlas URI connection string if specified, e.g. /clipmood?
+
+def _parse_db_name(uri: str) -> str:
     db_name = "clipmood"
     try:
-        # Simple parser for database name in connection string
-        path_part = MONGODB_URI.split("/")[-1]
-        clean_name = path_part.split("?")[0]
-        if clean_name:
-            db_name = clean_name
+        clean = uri.split("/")[-1].split("?")[0]
+        if clean:
+            db_name = clean
     except Exception:
         pass
-    
-    return client[db_name]
+    return db_name
 
-def verify_connection():
-    """
-    Utility helper to check database availability.
-    Runs a ping command against the cluster and returns True/False.
-    """
+
+def _init():
+    global _db, _client, _using_memory
+    if _db is not None:
+        return
+    if MONGODB_URI:
+        try:
+            from pymongo import MongoClient
+            client = MongoClient(MONGODB_URI, serverSelectionTimeoutMS=3000)
+            client.admin.command("ping")
+            _client = client
+            _db = client[_parse_db_name(MONGODB_URI)]
+            print(f"[db] Connected to MongoDB database '{_parse_db_name(MONGODB_URI)}'.")
+            return
+        except Exception as e:
+            print(f"[db] MongoDB unavailable ({e}).")
+    else:
+        print("[db] MONGODB_URI not set.")
+    from database.memory_db import InMemoryDatabase
+    _db = InMemoryDatabase()
+    _using_memory = True
+    print("[db] Using in-memory database (volatile). Data will NOT persist across "
+          "restarts. Set MONGODB_URI to a real MongoDB/Atlas cluster for persistence.")
+
+
+def get_db():
+    _init()
+    return _db
+
+
+def is_using_memory() -> bool:
+    _init()
+    return _using_memory
+
+
+def verify_connection() -> bool:
+    _init()
+    if _using_memory:
+        return True
     try:
-        client.admin.command('ping')
+        _client.admin.command("ping")
         return True
     except Exception as e:
         print(f"MongoDB connection failed: {e}")

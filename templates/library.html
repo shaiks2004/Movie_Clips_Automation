@@ -1,0 +1,40 @@
+{% extends "app_base.html" %}
+{% block title %}Content Library — ClipMood{% endblock %}
+{% block n_library %}active{% endblock %}
+{% block content %}
+<h1 class="page-title">Content Library</h1>
+<p class="page-sub">Search and manage every clip your account has generated.</p>
+<div class="toolbar">
+    <input class="input" id="q" placeholder="Search keywords..." oninput="render()" style="flex:1;min-width:200px;">
+    <select class="select" id="mood" onchange="render()"><option value="">All Moods</option><option>educational</option><option>motivational</option><option>funny</option><option>emotional</option><option>suspense</option><option>trending</option></select>
+    <select class="select" id="status" onchange="render()"><option value="">All Status</option><option>published</option><option>scheduled</option><option>done</option></select>
+    <div class="segmented"><button id="sg" class="active" onclick="setView('grid')">▦ Grid</button><button id="st" onclick="setView('table')">≣ Table</button></div>
+</div>
+<div id="gridView" class="clip-grid"></div>
+<div id="tableView" class="panel" style="display:none;overflow-x:auto;"><table class="data-table"><thead><tr><th>Title</th><th>Mood</th><th>Duration</th><th>Score</th><th>Status</th><th>Date</th><th></th></tr></thead><tbody id="tbody"></tbody></table></div>
+<div id="empty" class="empty" style="display:none;"><span class="big">🔍</span><p>No clips match your filters.</p></div>
+{% endblock %}
+{% block scripts %}
+<script>
+var DATA=[
+ {t:"3 Habits of Top 1% Creators",mood:"motivational",dur:"0:42",score:9.4,status:"published",date:"Jun 18"},
+ {t:"Why You're Always Tired",mood:"educational",dur:"0:58",score:9.1,status:"scheduled",date:"Jun 18"},
+ {t:"This Made The Whole Room Laugh",mood:"funny",dur:"0:31",score:8.8,status:"done",date:"Jun 17"},
+ {t:"The Moment Everything Changed",mood:"emotional",dur:"0:49",score:9.2,status:"published",date:"Jun 17"},
+ {t:"You Won't Believe What Happens",mood:"suspense",dur:"0:37",score:8.6,status:"done",date:"Jun 16"},
+ {t:"The Trend Everyone's Copying",mood:"trending",dur:"0:45",score:9.0,status:"scheduled",date:"Jun 15"},
+ {t:"One Tip That 10x'd My Reach",mood:"educational",dur:"0:53",score:8.9,status:"done",date:"Jun 14"},
+ {t:"Stop Doing This On Camera",mood:"motivational",dur:"0:40",score:8.7,status:"published",date:"Jun 13"}
+];
+var view='grid';
+function setView(v){ view=v; document.getElementById('sg').classList.toggle('active',v==='grid'); document.getElementById('st').classList.toggle('active',v==='table'); render(); }
+function filtered(){ var q=document.getElementById('q').value.toLowerCase(),m=document.getElementById('mood').value,s=document.getElementById('status').value; return DATA.filter(function(c){ return (!q||c.t.toLowerCase().indexOf(q)>-1)&&(!m||c.mood===m)&&(!s||c.status===s); }); }
+function render(){
+  var rows=filtered(),gv=document.getElementById('gridView'),tv=document.getElementById('tableView'),em=document.getElementById('empty');
+  gv.style.display=(view==='grid'&&rows.length)?'grid':'none'; tv.style.display=(view==='table'&&rows.length)?'block':'none'; em.style.display=rows.length?'none':'block';
+  gv.innerHTML=rows.map(function(c){ return '<div class="vcard tilt"><div class="tilt-glow"></div><div class="vthumb"><span class="score">★ '+c.score+'</span><div class="play">▶</div><span class="dur">'+c.dur+'</span></div><div class="vbody"><h4>'+c.t+'</h4><div class="meta"><span class="mood-badge mood-'+c.mood+'">'+c.mood+'</span> · '+c.date+'</div><div class="vactions"><button class="icon-btn" onclick="toast(\'Downloading...\')">⬇ Download</button><button class="icon-btn" onclick="toast(\'Deleted\')">🗑</button></div></div></div>'; }).join('');
+  document.getElementById('tbody').innerHTML=rows.map(function(c){ return '<tr><td>'+c.t+'</td><td><span class="mood-badge mood-'+c.mood+'">'+c.mood+'</span></td><td>'+c.dur+'</td><td>★ '+c.score+'</td><td><span class="status '+c.status+'">'+c.status+'</span></td><td class="muted">'+c.date+'</td><td><button class="icon-btn" onclick="toast(\'Downloading...\')">⬇</button></td></tr>'; }).join('');
+}
+render();
+</script>
+{% endblock %}

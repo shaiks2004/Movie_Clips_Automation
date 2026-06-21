@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Create account — ClipMood{% endblock %}
+{% block body %}
+<div class="auth-wrap"><div class="auth-card reveal">
+    <h1>Start free</h1><p class="sub">Create your account — 3 free clips, no card required.</p>
+    <div class="social-btns"><a href="/app" class="social-btn"><span>🔵</span> Sign up with Google</a><a href="/app" class="social-btn"><span>🐙</span> Sign up with GitHub</a></div>
+    <div class="divider">or</div>
+    <form onsubmit="event.preventDefault(); window.location.href='/app';">
+        <div class="field"><label>Full name</label><input class="form-input" type="text" placeholder="Jane Creator" required></div>
+        <div class="field"><label>Email</label><input class="form-input" type="email" placeholder="you@email.com" required></div>
+        <div class="field"><label>Password</label><input class="form-input" type="password" placeholder="Create a password" required></div>
+        <button class="btn btn-primary full-btn" type="submit">Create Account</button>
+    </form>
+    <p class="auth-foot">Already have an account? <a href="/login">Log in</a></p>
+</div></div>
+{% endblock %}

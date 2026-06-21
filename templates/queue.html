@@ -1,0 +1,29 @@
+{% extends "app_base.html" %}
+{% block title %}Publishing Queue — ClipMood{% endblock %}
+{% block n_queue %}active{% endblock %}
+{% block content %}
+<h1 class="page-title">Publishing Queue</h1>
+<p class="page-sub">Schedule clips across every platform from one place.</p>
+<div class="grid" style="grid-template-columns:1fr 1.4fr;">
+    <div class="panel reveal">
+        <div class="panel-head"><h3>Schedule a Clip</h3></div>
+        <div class="field"><label>Clip</label><select class="form-input"><option>3 Habits of Top 1% Creators</option><option>Why You're Always Tired</option><option>The Moment Everything Changed</option></select></div>
+        <div class="field"><label>Platform</label><select class="form-input"><option>TikTok</option><option>Instagram Reels</option><option>YouTube Shorts</option><option>Facebook</option><option>LinkedIn</option></select></div>
+        <div class="field"><label>Title</label><input class="form-input" value="3 Habits of Top 1% Creators"></div>
+        <div class="field"><label>Description</label><textarea class="form-input" rows="3">The mindset shifts that separate top creators from everyone else. 🚀</textarea></div>
+        <div class="field"><label>Hashtags</label><input class="form-input" value="#creator #growth #mindset"></div>
+        <div class="field"><label>Schedule date &amp; time</label><input class="form-input" type="datetime-local"></div>
+        <button class="btn btn-primary full-btn" onclick="toast('Clip scheduled (demo)')">📅 Schedule Post</button>
+    </div>
+    <div class="panel reveal">
+        <div class="panel-head"><h3>Scheduled Posts</h3><span class="muted" style="font-size:.82rem;">5 upcoming</span></div>
+        <div style="overflow-x:auto;"><table class="data-table"><thead><tr><th>Clip</th><th>Platform</th><th>When</th><th>Status</th><th></th></tr></thead><tbody>
+            <tr><td>3 Habits of Top 1% Creators</td><td>♪ TikTok</td><td>Today 6:00 PM</td><td><span class="status scheduled">Scheduled</span></td><td><button class="icon-btn" onclick="toast('Canceled')">✕</button></td></tr>
+            <tr><td>Why You're Always Tired</td><td>◎ Reels</td><td>Tomorrow 9:00 AM</td><td><span class="status scheduled">Scheduled</span></td><td><button class="icon-btn" onclick="toast('Canceled')">✕</button></td></tr>
+            <tr><td>The Trend Everyone's Copying</td><td>▶ Shorts</td><td>Fri 12:00 PM</td><td><span class="status queued">Queued</span></td><td><button class="icon-btn" onclick="toast('Canceled')">✕</button></td></tr>
+            <tr><td>The Moment Everything Changed</td><td>in LinkedIn</td><td>Sat 10:00 AM</td><td><span class="status queued">Queued</span></td><td><button class="icon-btn" onclick="toast('Canceled')">✕</button></td></tr>
+            <tr><td>Stop Doing This On Camera</td><td>f Facebook</td><td>Mon 8:00 AM</td><td><span class="status published">Published</span></td><td><button class="icon-btn" onclick="toast('Canceled')">✕</button></td></tr>
+        </tbody></table></div>
+    </div>
+</div>
+{% endblock %}

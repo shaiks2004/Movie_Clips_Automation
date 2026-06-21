@@ -364,6 +364,60 @@ def activate():
     users_repo.activate_premium(email)
     return jsonify({"ok": True, "activated": email})
 
+# ═══════════════════════════════════════════════════════
+#  🌐 MARKETING, AUTH & DEMO APP PAGES (UI with demo data)
+# ═══════════════════════════════════════════════════════
+def _site_email():
+    return os.getenv("YOUR_EMAIL", "sau84746@gmail.com")
+
+@app.route("/pricing")
+def pricing_page():
+    return render_template("pricing.html", your_email=_site_email())
+
+@app.route("/login")
+def login_page():
+    return render_template("login.html", your_email=_site_email())
+
+@app.route("/register")
+def register_page():
+    return render_template("register.html", your_email=_site_email())
+
+@app.route("/forgot")
+def forgot_page():
+    return render_template("forgot.html", your_email=_site_email())
+
+@app.route("/app")
+def app_dashboard():
+    return render_template("dashboard.html", your_email=_site_email())
+
+@app.route("/app/upload")
+def app_upload():
+    return render_template("studio_upload.html", your_email=_site_email())
+
+@app.route("/app/clips")
+def app_clips():
+    return render_template("clips.html", your_email=_site_email())
+
+@app.route("/app/library")
+def app_library():
+    return render_template("library.html", your_email=_site_email())
+
+@app.route("/app/queue")
+def app_queue_page():
+    return render_template("queue.html", your_email=_site_email())
+
+@app.route("/app/analytics")
+def app_analytics_page():
+    return render_template("analytics.html", your_email=_site_email())
+
+@app.route("/app/settings")
+def app_settings():
+    return render_template("settings.html", your_email=_site_email())
+
+@app.route("/app/profile")
+def app_profile():
+    return render_template("profile.html", your_email=_site_email())
+
 @app.errorhandler(413)
 def too_large(e):
     return jsonify({"error": "File size exceeds limit. Maximum is 500 MB."}), 413

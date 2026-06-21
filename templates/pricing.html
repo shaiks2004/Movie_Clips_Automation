@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Pricing — ClipMood{% endblock %}
+{% block nav_pricing %}active{% endblock %}
+{% block body %}
+<section class="section" style="padding-top:9rem;"><div class="container">
+    <div class="section-head reveal"><span class="eyebrow">Pricing</span><h1 class="h-lg">Plans that scale with your content</h1><p class="lead">Start free. Upgrade when you're ready to go unlimited.</p></div>
+    <div class="pricing">
+        <div class="price-card reveal"><div class="muted">Free</div><div class="price-num">₹0 <span>/ forever</span></div><ul class="price-feats"><li>3 clips per upload</li><li>Basic AI processing</li><li>Whisper transcription</li><li>Standard subtitle files</li><li>Content library</li></ul><a href="/register" class="btn btn-secondary full-btn">Start Free</a></div>
+        <div class="price-card featured reveal"><div class="muted">Premium</div><div class="price-num">₹299 <span>/ month</span></div><ul class="price-feats"><li>Unlimited clips per upload</li><li>Faster, priority processing</li><li>Advanced AI moment ranking</li><li>All 6 mood categories</li><li>Burned-in styled subtitles</li><li>Publishing queue &amp; analytics</li></ul><a href="/register" class="btn btn-primary full-btn">Go Premium</a></div>
+    </div>
+    <div class="section-head reveal" style="margin-top:6rem;"><span class="eyebrow">Compare</span><h2 class="h-lg">Feature comparison</h2></div>
+    <div class="panel reveal" style="overflow-x:auto;"><table class="data-table"><thead><tr><th>Feature</th><th>Free</th><th>Premium</th></tr></thead><tbody>
+        <tr><td>Clips per upload</td><td>3</td><td>Unlimited</td></tr>
+        <tr><td>Processing speed</td><td>Standard</td><td>Priority</td></tr>
+        <tr><td>AI highlight ranking</td><td>Basic</td><td>Advanced</td></tr>
+        <tr><td>Burned-in subtitles</td><td>—</td><td>✓</td></tr>
+        <tr><td>AI captions &amp; hashtags</td><td>✓</td><td>✓</td></tr>
+        <tr><td>Publishing queue</td><td>✓</td><td>✓</td></tr>
+        <tr><td>Analytics</td><td>Basic</td><td>Full</td></tr>
+    </tbody></table></div>
+    <div class="section-head reveal" style="margin-top:6rem;"><span class="eyebrow">FAQ</span><h2 class="h-lg">Questions, answered</h2></div>
+    <div class="grid grid-3">
+        <div class="card reveal"><h3>Can I cancel anytime?</h3><p>Yes — Premium is month-to-month. Cancel from Settings whenever you like.</p></div>
+        <div class="card reveal"><h3>What formats are supported?</h3><p>MP4, MOV, AVI, MKV, and WEBM up to 500 MB per upload.</p></div>
+        <div class="card reveal"><h3>Do I own my clips?</h3><p>Always. Every clip you generate is yours to download and publish.</p></div>
+    </div>
+</div></section>
+{% endblock %}

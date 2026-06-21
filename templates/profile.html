@@ -1,0 +1,31 @@
+{% extends "app_base.html" %}
+{% block title %}Profile — ClipMood{% endblock %}
+{% block n_profile %}active{% endblock %}
+{% block content %}
+<h1 class="page-title">Profile</h1>
+<p class="page-sub">Your account at a glance.</p>
+<div class="grid" style="grid-template-columns:1fr 2fr;">
+    <div class="panel reveal text-c">
+        <div class="avatar" style="width:96px;height:96px;font-size:2.2rem;margin:0 auto 1rem;">A</div>
+        <h3>Alex Morgan</h3><p class="muted">{{ your_email }}</p>
+        <div class="mt-2"><span class="badge badge-premium">Premium Factory</span></div>
+        <p class="muted mt-3" style="font-size:.82rem;">Member since Jan 2026</p>
+    </div>
+    <div>
+        <div class="metric-grid">
+            <div class="metric tilt"><div class="tilt-glow"></div><div class="label">Videos</div><div class="val">128</div></div>
+            <div class="metric tilt"><div class="tilt-glow"></div><div class="label">Clips</div><div class="val">1,042</div></div>
+            <div class="metric tilt"><div class="tilt-glow"></div><div class="label">Published</div><div class="val">386</div></div>
+        </div>
+        <div class="panel reveal"><div class="panel-head"><h3>Activity Log</h3></div>
+            <div class="activity">
+                <div class="activity-item"><div class="dot">🎬</div><div style="flex:1;"><div>Generated 6 clips from <b>Podcast Ep. 42</b></div><small>2 minutes ago</small></div></div>
+                <div class="activity-item"><div class="dot">🚀</div><div style="flex:1;"><div>Published <b>"Why You're Stuck"</b> to Reels</div><small>Yesterday</small></div></div>
+                <div class="activity-item"><div class="dot">⬆</div><div style="flex:1;"><div>Uploaded <b>Keynote_Final.mp4</b></div><small>2 days ago</small></div></div>
+                <div class="activity-item"><div class="dot">⚙</div><div style="flex:1;"><div>Updated notification settings</div><small>3 days ago</small></div></div>
+                <div class="activity-item"><div class="dot">💳</div><div style="flex:1;"><div>Upgraded to <b>Premium Factory</b></div><small>Jan 2026</small></div></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
