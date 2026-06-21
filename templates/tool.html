@@ -540,6 +540,32 @@
         </main>
     </div>
 
+    <!-- SCHEDULER MODAL -->
+    <div id="schedulerModal" style="display:none; position:fixed; z-index:100; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.8); align-items:center; justify-content:center;">
+        <div class="glass-panel" style="width:90%; max-width:450px; padding: 2rem; position:relative; border: 1px solid rgba(255,255,255,0.08); background: var(--panel-bg);">
+            <span style="position:absolute; right:1.5rem; top:0.8rem; font-size:1.8rem; cursor:pointer; color:var(--cream-dim);" onclick="closeSchedulerModal()">&times;</span>
+            <h3 id="modalSchedulerTitle" style="color:var(--accent); font-family: 'Bebas Neue', sans-serif; letter-spacing:1px; font-size: 1.8rem; margin-bottom: 0.5rem; margin-top: 0;">Schedule Post</h3>
+            <p id="modalSchedulerClipTitle" style="font-size:0.82rem; color:var(--cream-dim); margin-bottom:1.5rem; font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></p>
+            
+            <div class="field" style="margin-bottom:1.25rem;">
+                <label style="font-size:0.8rem; color:var(--cream-dim);">Platform Destination</label>
+                <select id="mPlatform" class="form-input" style="width:100%; margin-top:0.3rem;">
+                    <option value="facebook">Facebook Video</option>
+                    <option value="tiktok">TikTok</option>
+                    <option value="instagram">Instagram Reels</option>
+                    <option value="youtube">YouTube Shorts</option>
+                </select>
+            </div>
+            
+            <div class="field" style="margin-bottom:1.75rem;">
+                <label style="font-size:0.8rem; color:var(--cream-dim);">Schedule Date & Time</label>
+                <input type="datetime-local" id="mTime" class="form-input" style="width:100%; margin-top:0.3rem;" />
+            </div>
+            
+            <button class="btn btn-primary" onclick="submitModalToQueue()" style="width:100%; padding: 0.75rem;">Save Schedule Draft</button>
+        </div>
+    </div>
+
     <!-- Toast elements -->
     <div class="toast" id="toast"></div>
 
@@ -787,12 +813,7 @@
                     };
                     
                     document.getElementById('btnAddToQueue').onclick = () => {
-                        // Store clip ID in modal context and switch to schedule tab
-                        document.getElementById('nav-queue').setAttribute('data-target-clip', clip.clip_id);
-                        document.getElementById('nav-queue').setAttribute('data-target-title', clip.title || '');
-                        document.getElementById('nav-queue').setAttribute('data-target-desc', clip.description || '');
-                        document.getElementById('nav-queue').setAttribute('data-target-tags', JSON.stringify(clip.hashtags || []));
-                        switchSection('queue');
+                        openScheduler(clip.clip_id, clip.title || '', clip.description || '', clip.hashtags || []);
                     };
                     
                     const container = document.getElementById('playerContainer');
@@ -836,9 +857,10 @@
                             <div style="font-size: 0.8rem; color: var(--cream-dim); line-height: 1.5; height: 3em; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
                                 ${clip.ai_content?.description || 'No description hook.'}
                             </div>
-                            <div class="library-actions">
-                                <a class="btn btn-secondary" style="flex:1; padding: 0.4rem; font-size: 0.75rem;" href="/download/${encodeURIComponent(clip.filename)}" download>Download</a>
-                                <button class="btn btn-primary" style="flex:1; padding: 0.4rem; font-size: 0.75rem;" onclick="deleteClip('${clip.clip_id}')">Delete</button>
+                            <div class="library-actions" style="display:flex; gap: 0.35rem; margin-top: 0.75rem;">
+                                <a class="btn btn-secondary" style="flex:1; padding: 0.4rem 0.2rem; font-size: 0.73rem; text-align: center;" href="/download/${encodeURIComponent(clip.filename)}" download>Download</a>
+                                <button class="btn btn-primary" style="flex:1; padding: 0.4rem 0.2rem; font-size: 0.73rem;" onclick="openScheduler('${clip.clip_id}', \`${(clip.ai_content?.title || 'Clip Highlight').replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`, \`${(clip.ai_content?.description || '').replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`, ${JSON.stringify(clip.ai_content?.hashtags || [])})">Schedule</button>
+                                <button class="btn btn-secondary" style="padding: 0.4rem 0.4rem; font-size: 0.73rem; color: var(--red);" onclick="deleteClip('${clip.clip_id}')">Delete</button>
                             </div>
                         </div>
                     `;
@@ -984,6 +1006,55 @@
                 document.getElementById('statTime').textContent = (data.avg_processing_time || 0) + 's';
                 document.getElementById('statMood').textContent = data.top_mood || 'N/A';
             } catch(_) {}
+        }
+
+        let currentScheduleClip = {};
+
+        function openScheduler(clipId, title, desc, tags) {
+            currentScheduleClip = { clipId, title, desc, tags };
+            document.getElementById('modalSchedulerClipTitle').innerText = '"' + (title || 'Clip Highlight') + '"';
+            document.getElementById('mTime').value = '';
+            document.getElementById('schedulerModal').style.display = 'flex';
+        }
+
+        function closeSchedulerModal() {
+            document.getElementById('schedulerModal').style.display = 'none';
+        }
+
+        async function submitModalToQueue() {
+            const time = document.getElementById('mTime').value;
+            if(!time) {
+                showToast('Please select a schedule date & time.');
+                return;
+            }
+            const platform = document.getElementById('mPlatform').value;
+            
+            try {
+                const res = await fetch('/api/queue', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        clip_id: currentScheduleClip.clipId,
+                        title: currentScheduleClip.title,
+                        description: currentScheduleClip.desc,
+                        hashtags: currentScheduleClip.tags,
+                        platform: platform,
+                        schedule_time: time
+                    })
+                });
+                
+                if(res.ok) {
+                    showToast('Clip added to scheduling queue successfully.');
+                    closeSchedulerModal();
+                    loadQueue();
+                    switchSection('queue');
+                } else {
+                    const err = await res.json();
+                    showToast(err.error || 'Failed to add clip to queue.');
+                }
+            } catch(e) {
+                showToast('Network error adding clip to queue.');
+            }
         }
 
         let toastTimer;
