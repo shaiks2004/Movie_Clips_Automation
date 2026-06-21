@@ -221,9 +221,10 @@ def library():
                 continue
         filtered.append(c)
         
-    # Remove MongoDB '_id' for JSON serialization safety
+    # Remove MongoDB '_id' and joined 'video_info' for JSON serialization safety
     for c in filtered:
         c.pop("_id", None)
+        c.pop("video_info", None)
         
     return jsonify({"clips": filtered})
 
