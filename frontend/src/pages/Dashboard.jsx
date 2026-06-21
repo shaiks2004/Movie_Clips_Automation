@@ -72,14 +72,19 @@ function Dashboard() {
 
   const fetchUserStatus = async () => {
     try {
-      const res = await fetch(`/tool?email=${encodeURIComponent(email)}`)
-      if (res.status === 403) {
-        alert('Your account is suspended. Redirecting to home.')
-        navigate('/')
+      const res = await fetch(`/api/user/status?email=${encodeURIComponent(email)}`)
+      if (res.ok) {
+        const data = await res.json()
+        if (data.is_suspended) {
+          alert('Your account has been suspended by an administrator.')
+          navigate('/')
+          return
+        }
+        setIsPremium(data.is_premium)
+      } else {
+        const err = await res.json()
+        showToast(err.error || 'Failed to retrieve user status.', 'error')
       }
-      // Since it returns HTML template, we verify if it exists. 
-      // The role endpoint is /api/admin/users but let's assume if we got 200, user is registered.
-      setIsPremium(false) // default free
     } catch (e) {
       console.error(e)
     }

@@ -132,6 +132,27 @@ def tool():
         your_email=os.getenv("YOUR_EMAIL", "sau84746@gmail.com")
     )
 
+
+@app.route("/api/user/status")
+def user_status():
+    email = request.args.get("email", "").strip().lower()
+    if not email or "@" not in email:
+        return jsonify({"error": "Invalid email formatting."}), 400
+        
+    users_repo = UsersRepository()
+    # Auto register user on free tier if accessing for the first time
+    users_repo.register_user(email)
+    premium = users_repo.is_premium(email)
+    user = users_repo.get_user(email)
+    suspended = user.get("is_suspended", False) if user else False
+    
+    return jsonify({
+        "email": email,
+        "is_premium": premium,
+        "is_suspended": suspended
+    })
+
+
 # ═══════════════════════════════════════════════════════
 #  📤 UPLOAD & PIPELINE EXECUTION
 # ═══════════════════════════════════════════════════════
